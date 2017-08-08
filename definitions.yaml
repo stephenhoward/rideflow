@@ -1,0 +1,340 @@
+swagger: 2.0
+info: This is a meta-swagger file that includes definitions for several apis which all use the same object types. A tool will be built to convert this file into multiple swagger files.
+apis:
+    defaults:
+        schemes: https
+        consumes: 'application/json'
+        produces: 'application/json'
+
+    Public:
+        info:
+            title: {domain} public transit api
+            description: Publicly available data about the transit system
+            version: 1.0
+        basePath: /v1
+
+        paths:
+            /routes:
+                get:
+                    description: Returns a list of all routes in the system
+                    responses:
+                        '200':
+                            description: A list of routes
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/definitions/Route'
+            /routes/{route_id}/stops:
+                get:
+                    description: Returns a list of stops on a route
+                    parameters:
+                      - name: route_id
+                        in: path
+                        type: string
+                        format: uuid
+                        required: true
+                    responses:
+                        '200':
+                            description: A list of stops
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/definitions/Stop'
+            /stops:
+                description: Returns a list of all stops in the system
+                responses:
+                    '200':
+                        description: A list of stops
+                        schema:
+                            type: array
+                            items:
+                                $ref: '#/definitions/Stop'
+            /stops/{stop_id}:
+                get:
+                    description: summary of information for a stop, including eta information
+                    parameters:
+                      - name: stop_id
+                        in: path
+                        type: string
+                        format: uuid
+                        required: true
+                    responses:
+                        '200':
+                          description: Information about a stop
+                          schema:
+                              $ref: '#/definitions/Stop'          
+            /vendors:
+                get:
+                    description: Returns a list of places to buy passes and tokens
+                    responses:
+                        '200':
+                            description: A list of vendors
+                            schema:
+                                $ref: '#/definitions/Vendor'
+            /gtfs:
+                get:
+                    description: Google Transit Feed
+                    produces: 'application/zip'
+
+            /gtfs/realtime/trips:
+                get:
+                    description: GTFS Realtime Trip Updates
+                    produces: application/x-protobuf
+
+            /gtfs/realtime/alerts:
+                get:
+                    description: GTFS Realtime Service Alerts
+                    produces: application/x-protobuf
+    Ride:
+        info:
+            title: {domain} internal transit api
+            description: API used by vehicles to manage passes and travel
+            version: 1.0
+        basePath: /v1
+
+        paths:
+            /sessions:
+                post:
+                    description: Start a new Route Session
+                    parameters:
+                      - name: session
+                        in: body
+                        required: true
+                        schema:
+                          $ref: '#/definitions/RouteSession'
+                    responses:
+                        '200':
+                            description: A new Route Session
+                            schema:
+                                $ref: '#/definitions/RouteSession'
+            /sessions/{session_id}:
+                post:
+                    description: Update information about the session
+                    parameters:
+                      - name: session_id
+                        in: path
+                        required: true
+                      - name: session
+                        in: body
+                        required: true
+                        schema:
+                            $ref: '#/definitions/RouteSession'
+                    responses:
+                        '200':
+                delete:
+                    description: End the session
+                    parameters:
+                      - name: session_id
+                        in: path
+                        required: true
+                    responsess:
+                        '200':
+            /sessions/{session_id}/ride:
+                post:
+                    description: Submit a pass or token to register a ride
+                    parameters:
+                        - name: pass
+                          in: body
+                          required: true
+                          schema:
+                              $ref: '#/definitions/Pass'
+                    responses:
+                        '200':
+                            schema:
+                                $ref '#/definitions/Ride'
+    Vend:
+        info:
+            title: {domain} internal vending api
+            description: API used by vending machines to manage tokens and passes
+            version: 1.0
+        basePath: /v1
+
+        paths:
+            /passes:
+                post:
+                    description: create a new pass
+            /passes/{pass_id}:
+                get:
+                    description: check the current status of a pass
+            /vendors/{vendor_id}:
+                post:
+                    description: update status of vending machine
+    Manage:
+        info:
+            title: {domain} manager transit api
+            version: 1.0
+        basePath: /v1
+
+        paths:
+            allOf:
+                - $ref: '#/apis/Public'
+                - /sessions:
+                      get:
+                          description: List route session history
+                - /sessions/{session_id}:
+                      get:
+                          description: Get information on a session
+                      post:
+                          description: manipulate a session (for active sessions only)
+definitions:
+    Identifiable:
+        description: abstract base class for things with a uuid
+        type: object
+        properties:
+          id:
+              type:   string
+              format: uuid
+              domain: public
+    Locatable:
+        description: abstract base class for things that have a position in space
+        allOf:
+            - $ref: '#/definitions/Identifiable'
+            - type: object
+              properties:
+                  latitude:
+                      description: degrees North
+                      type: float
+                  longitude:
+                      description: degrees East
+                      type: float
+                  date_updated:
+                      type: string
+                      format: date-time
+    Token:
+        description: a single-use credit for riding the transit system
+        allOf:
+            - $ref: '#/definitions/Identifiable'
+            - type: object
+              properties:
+                  date_issued:
+                      type:   string
+                      format: date-time
+                      description: Date Purchased/Created
+                      domain: manage
+                  date_used:
+                      type: string
+                      format: date-time
+                      description: date redeemed or last used (in the case of multi-use passes)
+    Pass:
+        description: a multi-use credit for riding the transit system
+        allOf:
+          - $ref: '#/definitions/Token'
+          - type: object
+            properties:
+                rides:
+                    type: integer
+                    format: int32
+                    description: Rides remaining
+                    domain: internal
+                duration:
+                    type: integer
+                    format: int32
+                    description: Value of pass in days
+                date_expires:
+                    type:   string
+                    format: date-time
+                    description: Last day pass is valid
+                    domain: internal
+                guest_id:
+                    type: string
+                    domain: internal
+                    description: Identifier for partner program
+    FamilyPass:
+        description: a pass that can be used for more than one person
+        allOf:
+            - $ref: '#/definitions/Pass'
+            - type: object
+              properties:
+    Route:
+      description: A set of stops
+      allOf:
+          - $ref : '#/definitions/Identifiable'
+          - type: object
+            properties:
+              name:
+                  type: string
+              stops:
+                  type: array
+                  items:
+                      $ref: '#/definitions/Stop'
+    Stop:
+        description:
+        allOf:
+            - $ref: '#/definitions/Locatable'
+            - type: object
+              properties:
+                  name:
+                      type: string
+    RouteSession:
+        description: A period of time when a vehicle is actively plying a route
+        allOf:
+          - $ref: '#/definitions/Locatable'
+          - type: object
+            properties:
+                session_start:
+                    type: string
+                    format: date-time
+                session_end:
+                    type: string
+                    format: date-time
+                bearing:
+                    description: bearing (in degrees) clockwise from true North
+                    type: float
+                route:
+                    $ref: '#/descriptions/Route'
+                vehicle:
+                    $ref: '#/descriptions/Vehicle'
+                driver:
+                    $ref: '#/descriptions/User'
+                fares:
+                    type: array
+                    items:
+                        $ref: '#/descriptions/Ride'
+    Ride:
+        description: a logged ride on the transit system
+        timestamp:
+            type: string
+            format: date-time
+        token:
+            $ref : '#/descriptions/Token'
+        route_session:
+            $ref: '#/descriptions/RouteSession'
+        type:
+            type: string
+            enum:
+                - Token
+                - Pass
+                - Mobile
+    Vendor:
+        allOf:
+            - $ref: '#/definitions/Locatable'
+            - type: object
+              properties:
+              name:
+                type: string
+    User:
+        description: an employee of the transit system
+        allOf:
+            - $ref: '#/definitions/Identifiable'
+            - type: object
+              properties:
+                  firstname:
+                      type: string
+                  lastname:
+                      type: string
+    Vehicle:
+        allOf:
+            - $ref: '#/definitions/Identifiable'
+            - type: object
+              properties:
+                name:
+                  type: string
+                  description: vehicle Identifier
+                type:
+                  type: string
+                  enum:
+                      - Bus
+                      - Ferry
+                      - Train
+                notes:
+                    type: string

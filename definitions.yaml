@@ -1,5 +1,6 @@
 swagger: 2.0
-info: This is a meta-swagger file that includes definitions for several apis which all use the same object types. A tool will be built to convert this file into multiple swagger files.
+info:
+    description: This is a meta-swagger file that includes definitions for several apis which all use the same object types. A tool will be built to convert this file into multiple swagger files.
 apis:
     defaults:
         schemes: https

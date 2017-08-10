@@ -178,6 +178,12 @@ apis:
                       post:
                           description: manipulate a session (for active sessions only)
 definitions:
+    rider_class:
+        type: string
+        enum:
+            - Adult
+            - Youth
+            - Senior
     Identifiable:
         description: abstract base class for things with a uuid
         type: object
@@ -222,6 +228,8 @@ definitions:
           - $ref: '#/definitions/Token'
           - type: object
             properties:
+                class:
+                    $ref: '#/definitions/rider_class'
                 rides:
                     type: integer
                     format: int32
@@ -240,24 +248,28 @@ definitions:
                     type: string
                     domain: internal
                     description: Identifier for partner program
-    FamilyPass:
-        description: a pass that can be used for more than one person
+    PassGroup:
+        description: a set of passes maintained by a smart device (so a family could board with a single swipe, for example)
         allOf:
-            - $ref: '#/definitions/Pass'
+            - $ref : '#/definitions/Identifiable'
             - type: object
               properties:
+                  passes:
+                      type: array
+                      items:
+                          $ref: '#/definitions/Pass'
     Route:
-      description: A set of stops
-      allOf:
-          - $ref : '#/definitions/Identifiable'
-          - type: object
-            properties:
-              name:
-                  type: string
-              stops:
-                  type: array
-                  items:
-                      $ref: '#/definitions/Stop'
+        description: A set of stops
+        allOf:
+            - $ref : '#/definitions/Identifiable'
+            - type: object
+              properties:
+                name:
+                    type: string
+                stops:
+                    type: array
+                    items:
+                        $ref: '#/definitions/Stop'
     Stop:
         description:
         allOf:
@@ -300,12 +312,14 @@ definitions:
             $ref : '#/descriptions/Token'
         route_session:
             $ref: '#/descriptions/RouteSession'
-        type:
+        pass_type:
             type: string
             enum:
                 - Token
                 - Pass
                 - Mobile
+        class:
+            $ref: '#/definitions/rider_class'
     Vendor:
         allOf:
             - $ref: '#/definitions/Locatable'

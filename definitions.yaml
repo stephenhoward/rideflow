@@ -1,3 +1,4 @@
+---
 swagger: 2.0
 info:
     description: This is a meta-swagger file that includes definitions for several apis which all use the same object types. A tool will be built to convert this file into multiple swagger files.
@@ -6,14 +7,12 @@ apis:
         schemes: https
         consumes: 'application/json'
         produces: 'application/json'
-
-    Public:
+    public:
         info:
-            title: {domain} public transit api
+            title: public transit api
             description: Publicly available data about the transit system
             version: 1.0
         basePath: /v1
-
         paths:
             /routes:
                 get:
@@ -25,15 +24,15 @@ apis:
                                 type: array
                                 items:
                                     $ref: '#/definitions/Route'
-            /routes/{route_id}/stops:
+            '/routes/{route_id}/stops':
                 get:
                     description: Returns a list of stops on a route
                     parameters:
-                      - name: route_id
-                        in: path
-                        type: string
-                        format: uuid
-                        required: true
+                        - name: route_id
+                          in: path
+                          type: string
+                          format: uuid
+                          required: true
                     responses:
                         '200':
                             description: A list of stops
@@ -50,7 +49,7 @@ apis:
                             type: array
                             items:
                                 $ref: '#/definitions/Stop'
-            /stops/{stop_id}:
+            '/stops/{stop_id}':
                 get:
                     description: summary of information for a stop, including eta information
                     parameters:
@@ -86,9 +85,9 @@ apis:
                 get:
                     description: GTFS Realtime Service Alerts
                     produces: application/x-protobuf
-    Ride:
+    ride:
         info:
-            title: {domain} internal transit api
+            title: internal transit api
             description: API used by vehicles to manage passes and travel
             version: 1.0
         basePath: /v1
@@ -108,7 +107,7 @@ apis:
                             description: A new Route Session
                             schema:
                                 $ref: '#/definitions/RouteSession'
-            /sessions/{session_id}:
+            '/sessions/{session_id}':
                 post:
                     description: Update information about the session
                     parameters:
@@ -130,7 +129,7 @@ apis:
                         required: true
                     responsess:
                         '200':
-            /sessions/{session_id}/ride:
+            '/sessions/{session_id}/ride':
                 post:
                     description: Submit a pass or token to register a ride
                     parameters:
@@ -142,10 +141,10 @@ apis:
                     responses:
                         '200':
                             schema:
-                                $ref '#/definitions/Ride'
-    Vend:
+                                $ref: '#/definitions/Ride'
+    vend:
         info:
-            title: {domain} internal vending api
+            title: internal vending api
             description: API used by vending machines to manage tokens and passes
             version: 1.0
         basePath: /v1
@@ -154,33 +153,31 @@ apis:
             /passes:
                 post:
                     description: create a new pass
-            /passes/{pass_id}:
+            '/passes/{pass_id}':
                 get:
                     description: check the current status of a pass
-            /vendors/{vendor_id}:
+            '/vendors/{vendor_id}':
                 post:
                     description: update status of vending machine
-    Manage:
+    manage:
         info:
-            title: {domain} manager transit api
+            title: manager transit api
             version: 1.0
         basePath: /v1
-
         paths:
-            allOf:
-                - $ref: '#/apis/Public'
-                - /sessions:
-                      get:
-                          description: List route session history
-                - /sessions/{session_id}:
-                      get:
-                          description: Get information on a session
-                      post:
-                          description: manipulate a session (for active sessions only)
+            /sessions:
+                get:
+                    description: List route session history
+            '/sessions/{session_id}':
+                get:
+                    description: Get information on a session
+                post:
+                    description: manipulate a session (for active sessions only)
 definitions:
     rider_class:
         type: string
         enum:
+            - General
             - Adult
             - Youth
             - Senior
@@ -218,23 +215,30 @@ definitions:
                       format: date-time
                       description: Date Purchased/Created
                       domain: manage
-                  date_used:
-                      type: string
-                      format: date-time
-                      description: date redeemed or last used (in the case of multi-use passes)
-    Pass:
-        description: a multi-use credit for riding the transit system
+    TokenPass:
+        description: A way to purchase multiple rides at a time
+        allOf:
+            - $ref: '#/definitions/Token'
+            - type: object
+              properties:
+                  rides:
+                      type: integer
+                      format: int32
+                      description: Rides remaining
+                      domain: internal
+                  rides_remaining:
+                      type: integer
+                      format: int32
+                      description: Rides remaining
+                      domain: internal
+    TimePass:
+        description: a time-based credit for riding the transit system
         allOf:
           - $ref: '#/definitions/Token'
           - type: object
             properties:
                 class:
                     $ref: '#/definitions/rider_class'
-                rides:
-                    type: integer
-                    format: int32
-                    description: Rides remaining
-                    domain: internal
                 duration:
                     type: integer
                     format: int32
@@ -257,7 +261,7 @@ definitions:
                   passes:
                       type: array
                       items:
-                          $ref: '#/definitions/Pass'
+                          $ref: '#/definitions/Token'
     Route:
         description: A set of stops
         allOf:

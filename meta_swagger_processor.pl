@@ -29,5 +29,8 @@ while ( my ( $name, $api) = each %{$meta_config->{apis}} ) {
         print $@ . "\n";
     }
 
+    # validator adds an invalid id parameter:
+    delete $output->{id};
+
     DumpFile($name.'.swagger.yaml', $output );
 }

@@ -25,7 +25,7 @@ apis:
                             schema:
                                 type: array
                                 items:
-                                    '$ref': '#/definitions/Route'
+                                    $ref: '#/definitions/Route'
             '/routes/{route_id}/stops':
                 parameters:
                     - name: route_id
@@ -41,7 +41,7 @@ apis:
                             schema:
                                 type: array
                                 items:
-                                    '$ref': '#/definitions/Stop'
+                                    $ref: '#/definitions/Stop'
             /stops:
                 get:
                   description: Returns a list of all stops in the system
@@ -51,7 +51,7 @@ apis:
                           schema:
                               type: array
                               items:
-                                  '$ref': '#/definitions/Stop'
+                                  $ref: '#/definitions/Stop'
             '/stops/{stop_id}':
                 parameters:
                   - name: stop_id
@@ -65,7 +65,7 @@ apis:
                         '200':
                           description: Information about a stop
                           schema:
-                              '$ref': '#/definitions/Stop'
+                              $ref: '#/definitions/Stop'
             /vendors:
                 get:
                     description: Returns a list of places to buy passes and tokens
@@ -75,7 +75,7 @@ apis:
                             schema:
                               type: array
                               items:
-                                '$ref': '#/definitions/Vendor'
+                                $ref: '#/definitions/Vendor'
             /gtfs:
                 get:
                     description: Google Transit Feed
@@ -112,7 +112,7 @@ apis:
         info:
             title: internal transit api
             description: API used by vehicles to manage passes and travel
-            version: 1.0
+            version: "1.0"
         basePath: /v1
 
         paths:
@@ -124,16 +124,18 @@ apis:
                         in: body
                         required: true
                         schema:
-                          '$ref': '#/definitions/RouteSession'
+                            $ref: '#/definitions/RouteSession'
                     responses:
                         '200':
                             description: A new Route Session
                             schema:
-                                '$ref': '#/definitions/RouteSession'
+                                $ref: '#/definitions/RouteSession'
             '/sessions/{session_id}':
                 parameters:
                     - name: session_id
                       in: path
+                      type: string
+                      format: uuid
                       required: true
                 post:
                     description: Update information about the session
@@ -142,17 +144,19 @@ apis:
                         in: body
                         required: true
                         schema:
-                            '$ref': '#/definitions/RouteSession'
+                            $ref: '#/definitions/RouteSession'
                     responses:
                         '200':
+                            description: the updated RouteSession object
                             schema:
-                              '$ref': '#/definitions/RouteSession'
+                              $ref: '#/definitions/RouteSession'
                 delete:
                     description: End the session
-                    responsess:
+                    responses:
                         '200':
+                            description: The deactivated RouteSession object
                             schema:
-                              '$ref': '#/definitions/RouteSession'
+                              $ref: '#/definitions/RouteSession'
             '/sessions/{session_id}/ride':
                 parameters:
                     - name: session_id
@@ -167,16 +171,17 @@ apis:
                           in: body
                           required: true
                           schema:
-                              '$ref': '#/definitions/Token'
+                              $ref: '#/definitions/Token'
                     responses:
                         '200':
+                            description: the created ride log item
                             schema:
-                                '$ref': '#/definitions/Ride'
+                                $ref: '#/definitions/Ride'
     vend:
         info:
             title: internal vending api
             description: API used by vending machines to manage tokens and passes
-            version: 1.0
+            version: "1.0"
         basePath: /v1
 
         paths:
@@ -185,8 +190,9 @@ apis:
                     description: create a new pass
                     responses:
                         '200':
+                            description: the newly created pass
                             schema:
-                                '$ref': '#/definitions/Token'
+                                $ref: '#/definitions/Token'
             '/passes/{pass_id}':
                 parameters:
                     - name: vendor_id
@@ -198,8 +204,9 @@ apis:
                     description: check the current status of a pass
                     responses:
                         '200':
+                            description: Information about the pass in the url
                             schema:
-                                '$ref': '#/definitions/Token'
+                                $ref: '#/definitions/Token'
             '/vendors/{vendor_id}':
                 parameters:
                     - name: vendor_id
@@ -211,12 +218,13 @@ apis:
                     description: update status of vending machine
                     responses:
                         '200':
+                            description: updated record for the Vendor
                             schema:
-                                '$ref': '#/definitions/Vendor'
+                                $ref: '#/definitions/Vendor'
     manage:
         info:
             title: manager transit api
-            version: 1.0
+            version: "1.0"
         basePath: /v1
         paths:
             /sessions:
@@ -231,15 +239,32 @@ apis:
                             - ended
                     responses:
                         '200':
+                            description: A list of sessions that match the query
                             schema:
                                 type: array
                                 items:
-                                    '$ref': '#/definitions/RouteSession'
+                                    $ref: '#/definitions/RouteSession'
             '/sessions/{session_id}':
+                parameters:
+                  - name: session_id
+                    in: path
+                    type: string
+                    format: uuid
+                    required: true
                 get:
                     description: Get information on a session
+                    responses:
+                        '200':
+                            description: Route Session Information
+                            schema:
+                                $ref: '#/definitions/RouteSession'
                 post:
                     description: manipulate a session (for active sessions only)
+                    responses:
+                        '200':
+                            description: Updated Route Session Information
+                            schema:
+                                $ref: '#/definitions/RouteSession'
 definitions:
     rider_class:
         type: string
@@ -258,7 +283,7 @@ definitions:
     Locatable:
         description: abstract base class for things that have a position in space
         allOf:
-            - '$ref': '#/definitions/Identifiable'
+            - $ref: '#/definitions/Identifiable'
             - type: object
               properties:
                   latitude:
@@ -273,7 +298,7 @@ definitions:
     Token:
         description: a single-use credit for riding the transit system
         allOf:
-            - '$ref': '#/definitions/Identifiable'
+            - $ref: '#/definitions/Identifiable'
             - type: object
               properties:
                   date_issued:
@@ -283,7 +308,7 @@ definitions:
     TokenPass:
         description: A way to purchase multiple rides at a time
         allOf:
-            - '$ref': '#/definitions/Token'
+            - $ref: '#/definitions/Token'
             - type: object
               properties:
                   rides:
@@ -297,11 +322,11 @@ definitions:
     TimePass:
         description: a time-based credit for riding the transit system
         allOf:
-          - '$ref': '#/definitions/Token'
+          - $ref: '#/definitions/Token'
           - type: object
             properties:
                 class:
-                    '$ref': '#/definitions/rider_class'
+                    $ref: '#/definitions/rider_class'
                 duration:
                     type: integer
                     format: int32
@@ -316,17 +341,17 @@ definitions:
     PassGroup:
         description: a set of passes maintained by a smart device (so a family could board with a single swipe, for example)
         allOf:
-            - '$ref' : '#/definitions/Identifiable'
+            - $ref: '#/definitions/Identifiable'
             - type: object
               properties:
                   passes:
                       type: array
                       items:
-                          '$ref': '#/definitions/Token'
+                          $ref: '#/definitions/Token'
     Route:
         description: A set of stops
         allOf:
-            - '$ref' : '#/definitions/Identifiable'
+            - $ref: '#/definitions/Identifiable'
             - type: object
               properties:
                 name:
@@ -334,17 +359,17 @@ definitions:
                 stops:
                     type: array
                     items:
-                        '$ref': '#/definitions/Stop'
+                        $ref: '#/definitions/Stop'
     Stop:
         description: A transit stop
         allOf:
-            - '$ref': '#/definitions/Locatable'
+            - $ref: '#/definitions/Locatable'
             - type: object
               properties:
                   name:
                       type: string
                   eta:
-                      '$ref': '#/definitions/Eta'
+                      $ref: '#/definitions/Eta'
     Eta:
         description: Information about the next vehicle arriving at a stop
         type: object
@@ -358,7 +383,7 @@ definitions:
     RouteSession:
         description: A period of time when a vehicle is actively plying a route
         allOf:
-          - '$ref': '#/definitions/Locatable'
+          - $ref: '#/definitions/Locatable'
           - type: object
             properties:
                 session_start:
@@ -371,15 +396,15 @@ definitions:
                     description: bearing (in degrees) clockwise from true North
                     type: number
                 route:
-                    '$ref': '#/definitions/Route'
+                    $ref: '#/definitions/Route'
                 vehicle:
-                    '$ref': '#/definitions/Vehicle'
+                    $ref: '#/definitions/Vehicle'
                 driver:
-                    '$ref': '#/definitions/User'
+                    $ref: '#/definitions/User'
                 fares:
                     type: array
                     items:
-                        '$ref': '#/definitions/Ride'
+                        $ref: '#/definitions/Ride'
     Ride:
         description: a logged ride on the transit system
         type: object
@@ -388,9 +413,9 @@ definitions:
                 type: string
                 format: date-time
             token:
-                '$ref' : '#/definitions/Token'
+                $ref: '#/definitions/Token'
             route_session:
-                '$ref': '#/definitions/RouteSession'
+                $ref: '#/definitions/RouteSession'
             pass_type:
                 type: string
                 enum:
@@ -398,10 +423,10 @@ definitions:
                     - Pass
                     - Mobile
             class:
-                '$ref': '#/definitions/rider_class'
+                $ref: '#/definitions/rider_class'
     Vendor:
         allOf:
-            - '$ref': '#/definitions/Locatable'
+            - $ref: '#/definitions/Locatable'
             - type: object
               properties:
                   name:
@@ -409,7 +434,7 @@ definitions:
     User:
         description: an employee of the transit system
         allOf:
-            - '$ref': '#/definitions/Identifiable'
+            - $ref: '#/definitions/Identifiable'
             - type: object
               properties:
                   firstname:
@@ -418,7 +443,7 @@ definitions:
                       type: string
     Vehicle:
         allOf:
-            - '$ref': '#/definitions/Identifiable'
+            - $ref: '#/definitions/Identifiable'
             - type: object
               properties:
                 name:

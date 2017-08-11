@@ -19,6 +19,7 @@ apis:
             /routes:
                 get:
                     description: Returns a list of all routes in the system
+                    x-mojo-to: 'route#list'
                     responses:
                         '200':
                             description: A list of routes

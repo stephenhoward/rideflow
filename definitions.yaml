@@ -27,14 +27,14 @@ apis:
                                 items:
                                     '$ref': '#/definitions/Route'
             '/routes/{route_id}/stops':
+                parameters:
+                    - name: route_id
+                      in: path
+                      type: string
+                      format: uuid
+                      required: true
                 get:
                     description: Returns a list of stops on a route
-                    parameters:
-                        - name: route_id
-                          in: path
-                          type: string
-                          format: uuid
-                          required: true
                     responses:
                         '200':
                             description: A list of stops
@@ -53,14 +53,14 @@ apis:
                               items:
                                   '$ref': '#/definitions/Stop'
             '/stops/{stop_id}':
+                parameters:
+                  - name: stop_id
+                    in: path
+                    type: string
+                    format: uuid
+                    required: true
                 get:
                     description: summary of information for a stop, including eta information
-                    parameters:
-                      - name: stop_id
-                        in: path
-                        type: string
-                        format: uuid
-                        required: true
                     responses:
                         '200':
                           description: Information about a stop
@@ -73,24 +73,41 @@ apis:
                         '200':
                             description: A list of vendors
                             schema:
+                              type: array
+                              items:
                                 '$ref': '#/definitions/Vendor'
             /gtfs:
                 get:
                     description: Google Transit Feed
                     produces:
                         - application/zip
+                    responses:
+                        '200':
+                            description: a zip file in the GTFS format
+                            schema:
+                                type: file
 
             /gtfs/realtime/trips:
                 get:
                     description: GTFS Realtime Trip Updates
                     produces:
                         - application/x-protobuf
+                    responses:
+                        '200':
+                            description: a response in the GTFS-realtime format
+                            schema:
+                                type: file
 
             /gtfs/realtime/alerts:
                 get:
                     description: GTFS Realtime Service Alerts
                     produces:
                         - application/x-protobuf
+                    responses:
+                        '200':
+                            description: a response in the GTFS-realtime format
+                            schema:
+                                type: file
     ride:
         info:
             title: internal transit api
@@ -114,12 +131,13 @@ apis:
                             schema:
                                 '$ref': '#/definitions/RouteSession'
             '/sessions/{session_id}':
+                parameters:
+                    - name: session_id
+                      in: path
+                      required: true
                 post:
                     description: Update information about the session
                     parameters:
-                      - name: session_id
-                        in: path
-                        required: true
                       - name: session
                         in: body
                         required: true
@@ -127,15 +145,21 @@ apis:
                             '$ref': '#/definitions/RouteSession'
                     responses:
                         '200':
+                            schema:
+                              '$ref': '#/definitions/RouteSession'
                 delete:
                     description: End the session
-                    parameters:
-                      - name: session_id
-                        in: path
-                        required: true
                     responsess:
                         '200':
+                            schema:
+                              '$ref': '#/definitions/RouteSession'
             '/sessions/{session_id}/ride':
+                parameters:
+                    - name: session_id
+                      in: path
+                      type: string
+                      format: uuid
+                      required: true
                 post:
                     description: Submit a pass or token to register a ride
                     parameters:
@@ -159,12 +183,36 @@ apis:
             /passes:
                 post:
                     description: create a new pass
+                    responses:
+                        '200':
+                            schema:
+                                '$ref': '#/definitions/Token'
             '/passes/{pass_id}':
+                parameters:
+                    - name: vendor_id
+                      in: path
+                      type: string
+                      format: uuid
+                      required: true
                 get:
                     description: check the current status of a pass
+                    responses:
+                        '200':
+                            schema:
+                                '$ref': '#/definitions/Token'
             '/vendors/{vendor_id}':
+                parameters:
+                    - name: vendor_id
+                      in: path
+                      type: string
+                      format: uuid
+                      required: true
                 post:
                     description: update status of vending machine
+                    responses:
+                        '200':
+                            schema:
+                                '$ref': '#/definitions/Vendor'
     manage:
         info:
             title: manager transit api
@@ -174,6 +222,19 @@ apis:
             /sessions:
                 get:
                     description: List route session history
+                    parameters:
+                      - name: status
+                        in: query
+                        type: string
+                        enum:
+                            - active
+                            - ended
+                    responses:
+                        '200':
+                            schema:
+                                type: array
+                                items:
+                                    '$ref': '#/definitions/RouteSession'
             '/sessions/{session_id}':
                 get:
                     description: Get information on a session
@@ -282,6 +343,18 @@ definitions:
               properties:
                   name:
                       type: string
+                  eta:
+                      '$ref': '#/definitions/Eta'
+    Eta:
+        description: Information about the next vehicle arriving at a stop
+        type: object
+        properties:
+            name:
+                description: description of the vehicle arriving
+                type: string
+            minutes:
+                description: number of minutes until the next vehicle arrives
+                type: integer
     RouteSession:
         description: A period of time when a vehicle is actively plying a route
         allOf:

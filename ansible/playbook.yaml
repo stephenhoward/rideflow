@@ -1,0 +1,11 @@
+---
+- hosts: all
+  vars:
+  become: true
+  become_user: root
+  roles:
+    - perl
+    - ansible-postgresql
+
+    
+

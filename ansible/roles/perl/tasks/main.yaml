@@ -1,0 +1,13 @@
+---
+- copy:
+    src: ../cpanfile
+    dest: /root/cpanfile
+    owner: root
+    group: root
+    mode: '0644'
+
+- name:  Install cpanm
+  shell: curl -L http://cpanmin.us | perl - App::cpanminus
+
+- name: install perl dependencies
+  command: cpanm --installdeps /root/

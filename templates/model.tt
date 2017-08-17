@@ -1,0 +1,11 @@
+package RideFlow::Model::[% model_name %];
+
+use Moose;
+
+extends 'RideFlow::Model::Base';
+
+with 'RideFlow::Model::Attributes::[% model_name %]';
+
+has 'storage' => ( is => 'ro', val => '[% model_name %]' );
+
+1;

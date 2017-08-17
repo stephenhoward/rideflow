@@ -1,0 +1,40 @@
+[%
+openapi_to_moose_types = {
+    boolean => 'Bool',
+    string  => 'Str',
+    number  => 'Num',
+    integer => 'Int',
+};
+
+MACRO attr_type(property,embedded) BLOCK;
+    IF property.item('$ref');
+        embedded ? "Object" : "'Maybe[Object]'";
+    ELSIF property.type == 'string';
+        IF property.enum;
+            "enum('" _ property.enum.join("','") _ "')";
+        ELSIF property.format == 'date' || property.format == 'date-time';
+            embedded ? "Object" : "'Maybe[Object]'";
+        ELSE;
+            embedded ? "Str" : "'Maybe[Str]'";
+        END;
+    ELSIF property.type == 'array';
+        "'ArrayRef[";
+            attr_type(property.items,1);
+        "]'";
+    ELSE;
+        "'Maybe[" UNLESS embedded;
+        openapi_to_moose_types.${property.type};
+        "]'" UNLESS embedded;
+    END;
+END;
+
+-%]
+package RideFlow::Model::Attributes::[% model_name %];
+
+use Moose;
+
+[% FOREACH property = model.properties.keys; %]
+has '[% property %]' => ( is => 'rw', isa => [% attr_type(model.properties.$property) %] );
+[% END %]
+
+1;

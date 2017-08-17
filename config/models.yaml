@@ -1,0 +1,285 @@
+---
+rider_class:
+    description: enumeration for different kinds of riders
+    type: string
+    enum:
+        - General
+        - Adult
+        - Youth
+        - Senior
+Identifiable:
+    description: role for things with a uuid
+    type: object
+    properties:
+      id:
+          type:   string
+          format: uuid
+          x-dbic-key: primary
+          x-rideflow-scope: public
+Locatable:
+    description: role for things that have a position in space
+    allOf:
+        - $ref: '#/definitions/Identifiable'
+        - type: object
+          properties:
+              latitude:
+                  description: degrees North
+                  type: number
+                  x-rideflow-scope: public
+              longitude:
+                  description: degrees East
+                  type: number
+                  x-rideflow-scope: public
+Vectorable:
+    description: role for things with position and direction
+    allOf:
+        - $ref: '#/definitions/Locatable'
+        - type: object
+          properties:
+              bearing:
+                  description: bearing (in degrees) clockwise from true North
+                  type: number
+              heading:
+                  description: textual description of direction
+                  x-rideflow-scope: public
+                  x-dbic-ignore: true
+                  type: string
+                  enum:
+                      - North
+                      - NorthEast
+                      - East
+                      - SouthEast
+                      - South
+                      - SouthWest
+                      - West
+                      - NorthWest
+Updateable:
+    description: role for things whose status are regularly updated
+    allOf:
+        - $ref: '#/definitions/Identifiable'
+        - type: object
+          properties:
+              date_updated:
+                  x-rideflow-scope: protected
+                  type: string
+                  format: date-time
+Token:
+    description: a single-use credit for riding the transit system
+    x-rideflow-scope: protected
+    x-dbic-table: pass
+    allOf:
+        - $ref: '#/definitions/Identifiable'
+        - type: object
+          properties:
+              date_issued:
+                  type:   string
+                  format: date-time
+                  description: Date Purchased/Created
+TokenPass:
+    description: A way to purchase multiple rides at a time
+    x-rideflow-scope: protected
+    x-dbic-table: pass
+    allOf:
+        - $ref: '#/definitions/Token'
+        - type: object
+          properties:
+              rides:
+                  type: integer
+                  format: int32
+                  description: Rides remaining
+              rides_remaining:
+                  type: integer
+                  format: int32
+                  description: Rides remaining
+TimePass:
+    description: a time-based credit for riding the transit system
+    x-rideflow-scope: protected
+    x-dbic-table: pass
+    allOf:
+      - $ref: '#/definitions/Token'
+      - type: object
+        properties:
+            class:
+                $ref: '#/definitions/rider_class'
+            duration:
+                type: integer
+                format: int32
+                description: Value of pass
+            duration_type:
+                type: string
+                description: units 'duration' is measured in
+                enum:
+                    - hours
+                    - days
+                    - weeks
+                    - months
+            date_expires:
+                type:   string
+                format: date-time
+                description: Last day pass is valid
+            guest_id:
+                type: string
+                description: Identifier for partner program
+PassGroup:
+    description: a set of passes maintained by a smart device (so a family could board with a single swipe, for example)
+    allOf:
+        - $ref: '#/definitions/Identifiable'
+        - type: object
+          properties:
+              passes:
+                  type: array
+                  items:
+                      $ref: '#/definitions/Token'
+Route:
+    description: A set of stops
+    x-rideflow-scope: public
+    allOf:
+        - $ref: '#/definitions/Identifiable'
+        - type: object
+          properties:
+            name:
+                type: string
+            stops:
+                type: array
+                items:
+                    $ref: '#/definitions/Stop'
+Stop:
+    description: A transit stop
+    x-dbic-table: stops
+    x-rideflow-scope: public
+    allOf:
+        - $ref: '#/definitions/Locatable'
+        - $ref: '#/definitions/Updateable'
+        - type: object
+          properties:
+              name:
+                  type: string
+              eta:
+                  description: Information about the next vehicle arriving at this stop
+                  type: object
+                  x-dbic-ignore: true
+                  x-rideflow-scope: public
+                  properties:
+                      name:
+                          description: description of the vehicle arriving
+                          type: string
+                      minutes:
+                          description: number of minutes until the next vehicle arrives
+                          type: integer
+              routes:
+                  type: array
+                  x-dbic-rel: many_to_many
+                  x-dbic-fkey: stop_id
+                  x-dbic-bridge: '#/definitions/RouteStop'
+                  items:
+                    $ref: '#/definitions/Route'
+RouteStop:
+    description: many to many bridge for Routes and Stops
+    x-rideflow-scope: storage
+    x-dbic-table: route_stops
+    type: object
+    properties:
+        stop:
+            x-dbic-rel: belongs_to
+            x-dbic-key: stop_id
+            $ref: '#/definitions/Stop'
+        route:
+RouteSession:
+    description: A period of time when a vehicle is actively plying a route
+    x-rideflow-scope: protected
+    x-dbic-table: route_sessions
+    allOf:
+      - $ref: '#/definitions/Vectorable'
+      - $ref: '#/definitions/Updateable'
+      - type: object
+        properties:
+            session_start:
+                type: string
+                format: date-time
+            session_end:
+                type: string
+                format: date-time
+            route:
+                x-dbic-rel: belongs_to
+                x-dbic-key: route_id
+                $ref: '#/definitions/Route'
+            vehicle:
+                x-dbic-rel: belongs_to
+                x-dbic-key: vehicle_id
+                $ref: '#/definitions/Vehicle'
+            driver:
+                x-dbic-rel: belongs-to
+                x-dbic-key: driver_id
+                $ref: '#/definitions/User'
+            rides:
+                type: array
+                x-dbic-rel: has_many
+                x-dbic-fkey: route_session_id
+                items:
+                    $ref: '#/definitions/Ride'
+Ride:
+    description: a logged ride on the transit system
+    x-dbic-table: rides
+    x-rideflow-scope: protected
+    allOf:
+      - $ref: '#/definitions/Vectorable'
+      - type: object
+        properties:
+            timestamp:
+                type: string
+                format: date-time
+            token:
+                x-rideflow-scope: private
+                $ref: '#/definitions/Token'
+            route_session:
+                x-rideflow-scope: private
+                $ref: '#/definitions/RouteSession'
+            pass_type:
+                type: string
+                enum:
+                    - Token
+                    - Pass
+                    - Mobile
+            class:
+                $ref: '#/definitions/rider_class'
+Vendor:
+    description: a machine or business that sells tokens and passes
+    x-dbic-table: vendors
+    x-rideflow-scope: public
+    allOf:
+        - $ref: '#/definitions/Locatable'
+        - type: object
+          properties:
+              name:
+                  type: string
+User:
+    description: an employee of the transit system
+    x-rideflow-scope: protected
+    x-dbic-table: users
+    allOf:
+        - $ref: '#/definitions/Identifiable'
+        - type: object
+          properties:
+              firstname:
+                  type: string
+              lastname:
+                  type: string
+Vehicle:
+    description: a vehicle plys a route to trasport riders
+    x-dbic-table: vehicles
+    x-rideflow-scope: protected
+    allOf:
+        - $ref: '#/definitions/Identifiable'
+        - type: object
+          properties:
+            name:
+              type: string
+              description: vehicle Identifier
+            type:
+              type: string
+              enum:
+                  - Bus
+                  - Ferry
+                  - Train
+            notes:
+                type: string

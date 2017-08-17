@@ -1,0 +1,49 @@
+[%
+openapi_to_pg_types = {
+    boolean => 'boolean',
+    string  => 'text',
+    number  => 'numeric',
+    integer => 'int',
+};
+
+MACRO attr_type(property) BLOCK;
+    IF property.type == 'string';
+        IF property.format == 'uuid';
+            "'uuid'";
+        ELSIF property.format == 'date' || property.format == 'date-time';
+             "'datetime'";
+        ELSE;
+             "'text'";
+        END;
+    ELSE;
+        "'" _ openapi_to_pg_types.${property.type} _ "'";
+    END;
+END;
+
+-%]
+package RideFlow::DB::Result::[% model_name %];
+
+use strict;
+use warnings;
+use base 'RideFlow::DB::Result';
+
+__PACKAGE__->table('[% model.item('x-dbic-table') %]');
+__PACKAGE__->add_columns(
+[% FOREACH property = model.properties.keys; -%]
+    [%- NEXT IF model.properties.$property.type == 'array' || model.properties.$property.item('$ref') -%]
+    '[% property %]' => {
+        data_type => [% attr_type(model.properties.$property) %],
+        [% IF model.properties.$property.enum -%]
+        extras    => [ '[% model.properties.$property.enum.join("','") %]' ],
+        [% END -%]
+    },
+[% END -%]
+);
+
+# Relationships
+[%- FOREACH property = model.properties.keys; %]
+    [%- NEXT UNLESS model.properties.$property.type == 'array' || model.properties.$property.item('$ref') -%]
+    '[% property %]' => { data_type => [% attr_type(model.properties.$property) %] };
+[% END -%]
+
+1;

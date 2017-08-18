@@ -1,1 +1,0 @@
-{"virtualbox":{"/host":{"guestpath":"/host","hostpath":"/Users/stephen/Documents/Projects/MITrolley/rideflow","disabled":false,"__vagrantfile":true},"/vagrant":{"guestpath":"/vagrant","hostpath":"/Users/stephen/Documents/Projects/MITrolley/rideflow/vagrant/server","disabled":false,"__vagrantfile":true}}}

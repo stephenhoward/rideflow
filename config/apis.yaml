@@ -18,6 +18,8 @@ apis:
         paths:
             /routes:
                 get:
+                    tags:
+                        - routes
                     description: Returns a list of all routes in the system
                     x-mojo-to: 'route#list'
                     responses:
@@ -35,6 +37,8 @@ apis:
                       format: uuid
                       required: true
                 get:
+                    tags:
+                        - routes
                     description: Returns a list of stops on a route
                     responses:
                         '200':
@@ -45,14 +49,16 @@ apis:
                                     $ref: '#/definitions/Stop'
             /stops:
                 get:
-                  description: Returns a list of all stops in the system
-                  responses:
-                      '200':
-                          description: A list of stops
-                          schema:
-                              type: array
-                              items:
-                                  $ref: '#/definitions/Stop'
+                    tags:
+                        - stops
+                    description: Returns a list of all stops in the system
+                    responses:
+                        '200':
+                            description: A list of stops
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/definitions/Stop'
             '/stops/{stop_id}':
                 parameters:
                   - name: stop_id
@@ -62,6 +68,8 @@ apis:
                     required: true
                 get:
                     description: summary of information for a stop, including eta information
+                    tags:
+                        - stops
                     responses:
                         '200':
                           description: Information about a stop
@@ -69,6 +77,8 @@ apis:
                               $ref: '#/definitions/Stop'
             /vendors:
                 get:
+                    tags:
+                        - vendors
                     description: Returns a list of places to buy passes and tokens
                     responses:
                         '200':
@@ -79,6 +89,8 @@ apis:
                                 $ref: '#/definitions/Vendor'
             /gtfs:
                 get:
+                    tags:
+                        - transit_feed
                     description: Google Transit Feed
                     produces:
                         - application/zip
@@ -91,6 +103,8 @@ apis:
             /gtfs/realtime/trips:
                 get:
                     description: GTFS Realtime Trip Updates
+                    tags:
+                        - transit_feed
                     produces:
                         - application/x-protobuf
                     responses:
@@ -101,6 +115,8 @@ apis:
 
             /gtfs/realtime/alerts:
                 get:
+                    tags:
+                        - transit_feed
                     description: GTFS Realtime Service Alerts
                     produces:
                         - application/x-protobuf
@@ -266,195 +282,3 @@ apis:
                             description: Updated Route Session Information
                             schema:
                                 $ref: '#/definitions/RouteSession'
-definitions:
-    rider_class:
-        type: string
-        enum:
-            - General
-            - Adult
-            - Youth
-            - Senior
-    Identifiable:
-        description: abstract base class for things with a uuid
-        type: object
-        properties:
-          id:
-              type:   string
-              format: uuid
-    Locatable:
-        description: abstract base class for things that have a position in space
-        allOf:
-            - $ref: '#/definitions/Identifiable'
-            - type: object
-              properties:
-                  latitude:
-                      description: degrees North
-                      type: number
-                  longitude:
-                      description: degrees East
-                      type: number
-                  date_updated:
-                      type: string
-                      format: date-time
-    Token:
-        description: a single-use credit for riding the transit system
-        allOf:
-            - $ref: '#/definitions/Identifiable'
-            - type: object
-              properties:
-                  date_issued:
-                      type:   string
-                      format: date-time
-                      description: Date Purchased/Created
-    TokenPass:
-        description: A way to purchase multiple rides at a time
-        allOf:
-            - $ref: '#/definitions/Token'
-            - type: object
-              properties:
-                  rides:
-                      type: integer
-                      format: int32
-                      description: Rides remaining
-                  rides_remaining:
-                      type: integer
-                      format: int32
-                      description: Rides remaining
-    TimePass:
-        description: a time-based credit for riding the transit system
-        allOf:
-          - $ref: '#/definitions/Token'
-          - type: object
-            properties:
-                class:
-                    $ref: '#/definitions/rider_class'
-                duration:
-                    type: integer
-                    format: int32
-                    description: Value of pass in days
-                date_expires:
-                    type:   string
-                    format: date-time
-                    description: Last day pass is valid
-                guest_id:
-                    type: string
-                    description: Identifier for partner program
-    PassGroup:
-        description: a set of passes maintained by a smart device (so a family could board with a single swipe, for example)
-        allOf:
-            - $ref: '#/definitions/Identifiable'
-            - type: object
-              properties:
-                  passes:
-                      type: array
-                      items:
-                          $ref: '#/definitions/Token'
-    Route:
-        description: A set of stops
-        allOf:
-            - $ref: '#/definitions/Identifiable'
-            - type: object
-              properties:
-                name:
-                    type: string
-                stops:
-                    type: array
-                    items:
-                        $ref: '#/definitions/Stop'
-    Stop:
-        description: A transit stop
-        allOf:
-            - $ref: '#/definitions/Locatable'
-            - type: object
-              properties:
-                  name:
-                      type: string
-                  eta:
-                      $ref: '#/definitions/Eta'
-    Eta:
-        description: Information about the next vehicle arriving at a stop
-        type: object
-        properties:
-            name:
-                description: description of the vehicle arriving
-                type: string
-            minutes:
-                description: number of minutes until the next vehicle arrives
-                type: integer
-    RouteSession:
-        description: A period of time when a vehicle is actively plying a route
-        allOf:
-          - $ref: '#/definitions/Locatable'
-          - type: object
-            properties:
-                session_start:
-                    type: string
-                    format: date-time
-                session_end:
-                    type: string
-                    format: date-time
-                bearing:
-                    description: bearing (in degrees) clockwise from true North
-                    type: number
-                route:
-                    $ref: '#/definitions/Route'
-                vehicle:
-                    $ref: '#/definitions/Vehicle'
-                driver:
-                    $ref: '#/definitions/User'
-                fares:
-                    type: array
-                    items:
-                        $ref: '#/definitions/Ride'
-    Ride:
-        description: a logged ride on the transit system
-        type: object
-        properties:
-            timestamp:
-                type: string
-                format: date-time
-            token:
-                $ref: '#/definitions/Token'
-            route_session:
-                $ref: '#/definitions/RouteSession'
-            pass_type:
-                type: string
-                enum:
-                    - Token
-                    - Pass
-                    - Mobile
-            class:
-                $ref: '#/definitions/rider_class'
-    Vendor:
-        allOf:
-            - $ref: '#/definitions/Locatable'
-            - type: object
-              properties:
-                  name:
-                      type: string
-    User:
-        description: an employee of the transit system
-        allOf:
-            - $ref: '#/definitions/Identifiable'
-            - type: object
-              properties:
-                  firstname:
-                      type: string
-                  lastname:
-                      type: string
-    Vehicle:
-        allOf:
-            - $ref: '#/definitions/Identifiable'
-            - type: object
-              properties:
-                name:
-                  type: string
-                  description: vehicle Identifier
-                type:
-                  type: string
-                  enum:
-                      - Bus
-                      - Ferry
-                      - Train
-                notes:
-                    type: string

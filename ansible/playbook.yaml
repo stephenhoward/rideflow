@@ -6,6 +6,26 @@
   roles:
     - perl
     - ansible-postgresql
+  tasks:
+    - group: 
+        name: rideflow
+    - user:
+        name: rideflow
+        group: rideflow
+        comment: "RideFlow app user"
+    - user:
+        name: dev
+        group: rideflow
+        shell: /bin/bash
+        comment: "RideFlow developer"
+    - name: link app directory into user directory
+      file:
+        src: /rideflow
+        dest: /home/dev/rideflow
+        state: link
+        owner: dev
+        group: rideflow
+
 
     
 

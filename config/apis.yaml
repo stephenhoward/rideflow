@@ -81,9 +81,9 @@ apis:
                         '501':
                             $ref: '#/responses/NotImplemented'
                         '200':
-                          description: Information about a stop
-                          schema:
-                              $ref: '#/definitions/Stop'
+                            description: Information about a stop
+                            schema:
+                                $ref: '#/definitions/Stop'
             /vendors:
                 get:
                     tags:

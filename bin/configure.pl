@@ -14,7 +14,7 @@ my $models  = LoadFile('config/models.yaml');
 my $apis    = LoadFile('config/apis.yaml');
 my $config  = LoadFile('config/config.yaml');
 my %dbix_classes;
-my $model_link = qr/([^\/]+)$/;
+my $model_link = qr{#/definitions/([^\/]+)$};
 
 my $tt = Template->new({
     INCLUDE_PATH => 'templates',
@@ -63,6 +63,7 @@ while ( my ( $name, $api) = each %{$apis->{apis}} ) {
     my $output = {
         swagger => $apis->{swagger},
         host => $config->{server}{$name} || '',
+        responses => $apis->{responses},
         %{$apis->{apis}{defaults}},
         %$api,
         definitions => clone_merge( \%definitions, \%other_definitions ),
@@ -95,10 +96,8 @@ sub process_model {
     if ( $model->{allOf} ) {
         $model = clone_merge( (map {
 
-            if( $_->{'$ref'} ) {
-                my $other_model = ( $_->{'$ref'} =~ $model_link )[0];
-
-                process_model( $other_model );
+            if( $_->{'$ref'} && $_->{'$ref'} =~ $model_link ) {
+                process_model( $1 );
             }
             else {
                 $_;
@@ -121,20 +120,22 @@ sub process_properties {
 }
 
 sub find_definitions {
-    my( $ref, $definitions, $depth ) = @_;
+    my( $ref, $definitions ) = @_;
 
     if ( ref $ref eq 'ARRAY' ) {
-        find_definitions( $_, $definitions, $depth + 1 ) foreach ( grep { ref } @$ref );
+        find_definitions( $_, $definitions ) foreach ( grep { ref } @$ref );
     }
     elsif( ref $ref eq 'HASH' ) {
         while( my ( $key, $value ) = each %$ref ) {
-            if ( $key eq '$ref' ) {
-                my $model_name = ( $value =~ $model_link )[0];
+            if ( $key eq '$ref' && $value =~ $model_link ) {
 
-                $definitions->{$model_name} = $models->{$model_name};
+                if ( ! exists $definitions->{$1} ) {
+                    $definitions->{$1} = $models->{$1};
+                    find_definitions( $definitions->{$1}, $definitions )
+                }
             }
             elsif( ref $value ) {
-                find_definitions( $value, $definitions, $depth + 1 );
+                find_definitions( $value, $definitions );
             }
         }
     }

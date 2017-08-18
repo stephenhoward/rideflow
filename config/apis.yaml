@@ -8,7 +8,7 @@ apis:
         consumes:
             - application/json
         produces:
-            - application/json
+            - application/json;charset=UTF-8
     public:
         info:
             title: public transit api

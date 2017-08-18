@@ -33,8 +33,13 @@ package RideFlow::Model::Attributes::[% model_name %];
 
 use Moose;
 
+extends 'RideFlow::Model::Base';
+with 'RideFlow::Model::Meta::DBIC';
+
+sub dbic { '[% model_name %]' }
+
 [% FOREACH property = model.properties.keys; %]
-has '[% property %]' => ( is => 'rw', isa => [% attr_type(model.properties.$property) %] );
+has '[% property %]' => ( is => 'rw', isa => [% attr_type(model.properties.$property) %], traits => ['DBIC'] );
 [% END %]
 
 1;

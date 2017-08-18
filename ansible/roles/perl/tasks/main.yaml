@@ -10,4 +10,6 @@
   shell: curl -L http://cpanmin.us | perl - App::cpanminus
 
 - name: install perl dependencies
+  environment:
+    PERL_MM_USE_DEFAULT: 1
   command: cpanm --installdeps /root/

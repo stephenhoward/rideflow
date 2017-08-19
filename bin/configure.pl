@@ -16,38 +16,30 @@ my $config  = LoadFile('config/config.yaml');
 my %dbix_classes;
 my $model_link = qr{#/definitions/([^\/]+)$};
 
+my $openapi_to_pg_types = {
+    'boolean' => 'boolean',
+    'string'  => {
+        'uuid'      => 'uuid',
+        'date'      => 'datetime',
+        'date-time' => 'datetime',
+        'default'   => 'text',
+    },
+    'number'  => 'numeric',
+    'integer' => 'int',
+};
+
 my $tt = Template->new({
     INCLUDE_PATH => 'templates',
     INTERPOLATE  => 0,
 }) or die "$Template::ERROR\n";
 
-foreach my $model ( keys %$models ) {
-    process_model( $model );
+foreach my $name ( keys %$models ) {
+    process_model( $name );
 
-    if ( $models->{$model}{type} eq 'object' ) {
-        $tt->process('model_attributes.tt',{ 
-            model => $models->{$model},
-            model_name => $model,
-        },'var/lib/RideFlow/Model/Attributes/'.$model.'.pm')
-            or die $tt->error();
+    model_output( $name, $models->{$name} ) if $models->{$name}{type} eq 'object';
+    db_output( $name, $models->{$name} ) if $models->{$name}{'x-dbic-table'};
 
-        if ( ! -f 'lib/RideFlow/Model/'.$model.'.pm' ) {
-            $tt->process('model.tt',{ 
-                model => $models->{$model},
-                model_name => $model,
-            },'lib/RideFlow/Model/'.$model.'.pm')
-                or die $tt->error();           
-        }
-
-        if ( $models->{$model}{'x-dbic-table'} ) {
-            $tt->process('dbic.tt',{ 
-                model => $models->{$model},
-                model_name => $model,
-            },'var/lib/RideFlow/DB/Result/'.$model.'.pm')
-                or die $tt->error();           
-        }
-        remove_keys($models->{$model}, qr/^x-(?:dbic|rideflow)-/ );
-    }
+    remove_keys($models->{$name}, qr/^x-(?:dbic|rideflow)-/ );
 }
 
 while ( my ( $name, $api) = each %{$apis->{apis}} ) {
@@ -70,6 +62,56 @@ while ( my ( $name, $api) = each %{$apis->{apis}} ) {
     };
 
     DumpFile('var/config/'.$name.'.swagger.yaml', $output );
+}
+
+sub model_output {
+    my ( $name, $model ) = @_;
+
+    $tt->process('model_attributes.tt',{ 
+        model      => $model,
+        model_name => $name,
+    },'var/lib/RideFlow/Model/Attributes/'.$name.'.pm')
+        or die $tt->error();
+
+    if ( ! -f 'lib/RideFlow/Model/'.$name.'.pm' ) {
+        $tt->process('model.tt',{ 
+            model      => $model,
+            model_name => $name,
+        },'lib/RideFlow/Model/'.$name.'.pm')
+            or die $tt->error();           
+    }
+}
+
+sub pg_attr_type {
+    my ( $name, $property ) = @_;
+
+    warn "$name has no 'type'" if ! defined $property->{type};
+
+    if ( $property->{type} eq 'string' ) {
+
+        return $openapi_to_pg_types->{string}{ $property->{format} || 'default' } || 'text';
+    }
+
+    return $openapi_to_pg_types->{ $property->{type} };
+}
+
+sub db_output {
+    my ( $name, $model ) = @_;
+
+    $tt->process('dbic_attributes.tt',{ 
+        model      => $model,
+        model_name => $name,
+        pg_attr_type => \&pg_attr_type,
+    },'var/lib/RideFlow/DB/Result/Attributes/'.$name.'.pm')
+        or die $tt->error();           
+
+    if ( ! -f 'lib/RideFlow/DB/Result/'.$name.'.pm' ) {
+        $tt->process('dbic.tt',{ 
+            model      => $model,
+            model_name => $name,
+        },'lib/RideFlow/DB/Result/'.$name.'.pm')
+            or die $tt->error();
+    }
 }
 
 sub remove_keys {

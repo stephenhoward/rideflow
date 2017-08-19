@@ -1,38 +1,16 @@
-[%
-openapi_to_pg_types = {
-    boolean => 'boolean',
-    string  => 'text',
-    number  => 'numeric',
-    integer => 'int',
-};
+package RideFlow::DB::Result::Attributes::[% model_name %];
 
-MACRO attr_type(property) BLOCK;
-    IF property.type == 'string';
-        IF property.format == 'uuid';
-            "'uuid'";
-        ELSIF property.format == 'date' || property.format == 'date-time';
-             "'datetime'";
-        ELSE;
-             "'text'";
-        END;
-    ELSE;
-        "'" _ openapi_to_pg_types.${property.type} _ "'";
-    END;
-END;
+use Moose;
+use MooseX::MarkAsMethods autoclean => 1;
 
--%]
-package RideFlow::DB::Result::[% model_name %];
-
-use strict;
-use warnings;
-use base 'RideFlow::DB::Result';
+extends 'RideFlow::DB::Result';
 
 __PACKAGE__->table('[% model.item('x-dbic-table') %]');
 __PACKAGE__->add_columns(
 [% FOREACH property = model.properties.keys; -%]
-    [%- NEXT IF model.properties.$property.type == 'array' || model.properties.$property.item('$ref') -%]
+    [%- NEXT IF model.properties.$property.item('x-dbic-rel') -%]
     '[% property %]' => {
-        data_type => [% attr_type(model.properties.$property) %],
+        data_type => '[% pg_attr_type(property, model.properties.$property) %]',
         [% IF model.properties.$property.enum -%]
         extras    => [ '[% model.properties.$property.enum.join("','") %]' ],
         [% END -%]
@@ -41,9 +19,32 @@ __PACKAGE__->add_columns(
 );
 
 # Relationships
-[%- FOREACH property = model.properties.keys; %]
-    [%- NEXT UNLESS model.properties.$property.type == 'array' || model.properties.$property.item('$ref') -%]
-    '[% property %]' => { data_type => [% attr_type(model.properties.$property) %] };
+[%- FOREACH property = model.properties.keys;
+    p = model.properties.$property;
+    other_model = p.type == 'array' ? p.items.item('$ref') : p.item('$ref');
+    other_model = other_model.replace('#/definitions/','');
+%]
+    [% NEXT UNLESS p.item('x-dbic-rel') %]
+    [% IF p.item('x-dbic-rel') == 'many_to_many' %]
+    __PACKAGE__->many_to_many (
+        '[% property %]',
+        '[% p.item('x-dbic-bridge-name') %]',
+        '[% p.item('x-dbic-them') %]'
+    );
+    __PACKAGE__->has_many (
+        '[% p.item('x-dbic-bridge-name') %]',
+        'RideFlow::DB::Result::[% p.item('x-dbic-bridge').replace('#/definitions/','') %]',
+        '[% p.item('x-dbic-me') %]'
+    );
+    [% ELSE %]
+    __PACKAGE__->[% p.item('x-dbic-rel') %](
+        '[% property %]',
+        'RideFlow::DB::Result::[% other_model %]',
+        '[% p.item('x-dbic-key') %]'
+    );
+    [% END %]
 [% END -%]
+
+__PACKAGE__->meta->make_immutable;
 
 1;

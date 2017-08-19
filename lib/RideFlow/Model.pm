@@ -1,7 +1,6 @@
 package RideFlow::Model;
 
-use strict;
-use warnings;
+use Moose;
 
 use RideFlow::Model::Route;
 

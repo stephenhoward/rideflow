@@ -137,12 +137,17 @@ Route:
         - $ref: '#/definitions/Identifiable'
         - type: object
           properties:
-            name:
-                type: string
-            stops:
-                type: array
-                items:
-                    $ref: '#/definitions/Stop'
+              name:
+                  type: string
+              stops:
+                  type: array
+                  x-dbic-rel: many_to_many
+                  x-dbic-them: stop
+                  x-dbic-bridge-name: route_stops
+                  x-dbic-me: route
+                  x-dbic-bridge: '#/definitions/RouteStop'
+                  items:
+                      $ref: '#/definitions/Stop'
 Stop:
     description: A transit stop
     x-dbic-table: stops
@@ -169,7 +174,9 @@ Stop:
               routes:
                   type: array
                   x-dbic-rel: many_to_many
-                  x-dbic-fkey: stop_id
+                  x-dbic-them: route
+                  x-dbic-bridge-name: route_stops
+                  x-dbic-me: stop
                   x-dbic-bridge: '#/definitions/RouteStop'
                   items:
                     $ref: '#/definitions/Route'
@@ -184,6 +191,9 @@ RouteStop:
             x-dbic-key: stop_id
             $ref: '#/definitions/Stop'
         route:
+            x-dbic-rel: belongs_to
+            x-dbic-key: route_id
+            $ref: '#/definitions/Route'
 RouteSession:
     description: A period of time when a vehicle is actively plying a route
     x-rideflow-scope: protected
@@ -214,7 +224,7 @@ RouteSession:
             rides:
                 type: array
                 x-dbic-rel: has_many
-                x-dbic-fkey: route_session_id
+                x-dbic-key: route_session_id
                 items:
                     $ref: '#/definitions/Ride'
 Ride:
@@ -230,9 +240,13 @@ Ride:
                 format: date-time
             token:
                 x-rideflow-scope: private
+                x-dbic-rel: belongs_to
+                x-dbic-key: token_id
                 $ref: '#/definitions/Token'
             route_session:
                 x-rideflow-scope: private
+                x-dbic-rel: belongs_to
+                x-dbic-key: route_session_id
                 $ref: '#/definitions/RouteSession'
             pass_type:
                 type: string

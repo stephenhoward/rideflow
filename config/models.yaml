@@ -222,7 +222,7 @@ RouteSession:
                 x-dbic-key: vehicle_id
                 $ref: '#/definitions/Vehicle'
             driver:
-                x-dbic-rel: belongs-to
+                x-dbic-rel: belongs_to
                 x-dbic-key: driver_id
                 $ref: '#/definitions/User'
             rides:

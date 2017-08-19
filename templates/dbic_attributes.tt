@@ -7,25 +7,50 @@ extends 'RideFlow::DB::Result';
 
 __PACKAGE__->table('[% model.item('x-dbic-table') %]');
 __PACKAGE__->add_columns(
-[% FOREACH property = model.properties.keys; -%]
-    [%- NEXT IF model.properties.$property.item('x-dbic-rel') -%]
+[%
+FOREACH property = model.properties.keys;
+    p = model.properties.$property;
+    IF p.item('x-dbic-rel');
+        IF p.item('x-dbic-rel') == 'belongs_to';
+%]
+    '[% p.item('x-dbic-key') %]' => {
+        data_type => 'uuid',
+        is_foreign_key => 1,
+    },
+[%
+        END;
+    ELSE;
+-%]
     '[% property %]' => {
         data_type => '[% pg_attr_type(property, model.properties.$property) %]',
         [% IF model.properties.$property.enum -%]
-        extras    => [ '[% model.properties.$property.enum.join("','") %]' ],
+        extras => [ '[% model.properties.$property.enum.join("','") %]' ],
         [% END -%]
+        [% IF property == model.item('x-dbic-key') %]
+        is_nullable => 0,
+        [% END %]
     },
-[% END -%]
+[%
+    END;
+END
+-%]
 );
 
+[% IF model.item('x-dbic-key') %]
+__PACKAGE__->set_primary_key('[% model.item('x-dbic-key').join("','") %]');
+[% END %]
+
 # Relationships
-[%- FOREACH property = model.properties.keys;
+[%
+FOREACH property = model.properties.keys;
     p = model.properties.$property;
     other_model = p.type == 'array' ? p.items.item('$ref') : p.item('$ref');
     other_model = other_model.replace('#/definitions/','');
-%]
-    [% NEXT UNLESS p.item('x-dbic-rel') %]
-    [% IF p.item('x-dbic-rel') == 'many_to_many' %]
+
+    NEXT UNLESS p.item('x-dbic-rel');
+
+    IF p.item('x-dbic-rel') == 'many_to_many'
+-%]
     __PACKAGE__->many_to_many (
         '[% property %]',
         '[% p.item('x-dbic-bridge-name') %]',
@@ -36,14 +61,18 @@ __PACKAGE__->add_columns(
         'RideFlow::DB::Result::[% p.item('x-dbic-bridge').replace('#/definitions/','') %]',
         '[% p.item('x-dbic-me') %]'
     );
-    [% ELSE %]
+[%
+    ELSE
+-%]
     __PACKAGE__->[% p.item('x-dbic-rel') %](
         '[% property %]',
         'RideFlow::DB::Result::[% other_model %]',
         '[% p.item('x-dbic-key') %]'
     );
-    [% END %]
-[% END -%]
+[%
+    END;
+END;
+-%]
 
 __PACKAGE__->meta->make_immutable;
 

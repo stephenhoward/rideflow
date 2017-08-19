@@ -39,8 +39,8 @@ foreach my $name ( keys %$models ) {
     model_output( $name, $models->{$name} ) if $models->{$name}{type} eq 'object';
     db_output( $name, $models->{$name} ) if $models->{$name}{'x-dbic-table'};
 
-    remove_keys($models->{$name}, qr/^x-(?:dbic|rideflow)-/ );
 }
+remove_keys($models->{$_}, qr/^x-(?:dbic|rideflow)-/ ) foreach keys %$models;
 
 while ( my ( $name, $api) = each %{$apis->{apis}} ) {
 

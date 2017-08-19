@@ -10,11 +10,11 @@ rider_class:
 Identifiable:
     description: role for things with a uuid
     type: object
+    x-dbic-key: id
     properties:
       id:
           type:   string
           format: uuid
-          x-dbic-key: primary
           x-rideflow-scope: public
 Locatable:
     description: role for things that have a position in space
@@ -66,7 +66,7 @@ Updateable:
 Token:
     description: a single-use credit for riding the transit system
     x-rideflow-scope: protected
-    x-dbic-table: pass
+    x-dbic-table: passes
     allOf:
         - $ref: '#/definitions/Identifiable'
         - type: object
@@ -78,7 +78,7 @@ Token:
 TokenPass:
     description: A way to purchase multiple rides at a time
     x-rideflow-scope: protected
-    x-dbic-table: pass
+    x-dbic-table: passes
     allOf:
         - $ref: '#/definitions/Token'
         - type: object
@@ -94,7 +94,7 @@ TokenPass:
 TimePass:
     description: a time-based credit for riding the transit system
     x-rideflow-scope: protected
-    x-dbic-table: pass
+    x-dbic-table: passes
     allOf:
       - $ref: '#/definitions/Token'
       - type: object
@@ -132,6 +132,7 @@ PassGroup:
                       $ref: '#/definitions/Token'
 Route:
     description: A set of stops
+    x-dbic-table: routes
     x-rideflow-scope: public
     allOf:
         - $ref: '#/definitions/Identifiable'
@@ -184,6 +185,9 @@ RouteStop:
     description: many to many bridge for Routes and Stops
     x-rideflow-scope: storage
     x-dbic-table: route_stops
+    x-dbic-key:
+        - stop_id
+        - route_id
     type: object
     properties:
         stop:

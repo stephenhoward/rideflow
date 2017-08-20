@@ -32,6 +32,7 @@ my $tt = Template->new({
     INCLUDE_PATH => 'templates',
     INTERPOLATE  => 0,
 }) or die "$Template::ERROR\n";
+my %processed_models;
 
 foreach my $name ( keys %$models ) {
     process_model( $name );
@@ -179,6 +180,8 @@ sub remove_keys {
 sub process_model {
     my ( $name ) = @_;
 
+    return $models->{$name} if defined $processed_models{$name};
+
     my $model = $models->{$name};
 
     if ( $model->{allOf} ) {
@@ -200,11 +203,28 @@ sub process_model {
 
     $models->{$name} = $model;
 
+    $processed_models{$name}++;
     return $model;
 }
 
 sub process_properties {
-    my ( $name ) = @_;
+    my ( $model ) = @_;
+
+    while( my ( $name, $info ) = each %{$model->{properties}} ) {
+        if ( $info->{'$ref'} && $info->{'$ref'} =~ $model_link ) {
+
+            my $other_model = $1;
+
+            process_model($other_model);
+
+            if ( $models->{$other_model}{type} ne 'object' ) {
+
+                delete $info->{'$ref'};
+                $info->{$_} = $models->{$other_model}{$_} foreach keys %{$models->{$other_model}};
+            }
+
+        }
+    }
 }
 
 sub find_definitions {

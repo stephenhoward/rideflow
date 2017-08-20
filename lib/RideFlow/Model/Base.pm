@@ -17,7 +17,7 @@ sub list {
         map {
             $class->_new_from_db($_);
         }
-        @{$class->_schema->resultset( $class->dbic )->search()}
+        @{$class->_schema->resultset( $class->dbic )->search()->all()}
     ];
 }
 

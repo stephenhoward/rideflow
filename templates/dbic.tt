@@ -3,6 +3,7 @@ package RideFlow::DB::Result::[% model_name %];
 use Moose;
 use MooseX::MarkAsMethods autoclean => 1;
 
+# table definition for this class is here:
 extends 'RideFlow::DB::Result::Attributes::[% model_name %]';
 
 __PACKAGE__->meta->make_immutable;

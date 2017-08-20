@@ -40,6 +40,8 @@ foreach my $name ( keys %$models ) {
     db_output( $name, $models->{$name} ) if $models->{$name}{'x-dbic-table'};
 
 }
+my $schema = build_schema( $models );
+sql_output( $schema );
 remove_keys($models->{$_}, qr/^x-(?:dbic|rideflow)-/ ) foreach keys %$models;
 
 while ( my ( $name, $api) = each %{$apis->{apis}} ) {
@@ -80,6 +82,50 @@ sub model_output {
         },'lib/RideFlow/Model/'.$name.'.pm')
             or die $tt->error();           
     }
+}
+
+sub build_schema {
+
+    my ( $models ) = @_;
+    my %schema;
+
+    while( my ( $model, $m ) = each %$models ) {
+
+        next unless $m->{'x-dbic-table'};
+
+        while( my( $property, $p ) = each %{$m->{properties}} ) {
+            if ( my $rel = $p->{'x-dbic-rel'} ) {
+
+                if ( $rel eq 'belongs_to' ) {
+                    $schema{$model}{columns}{$p->{'x-dbic-key'}} = {
+                        data_type      => 'uuid',
+                        is_foreign_key => 1,
+                    };
+                }
+
+            }
+            else {
+
+                $schema{$model}{columns}{$property}{data_type} = pg_attr_type( $property, $p ) || '';
+                $schema{$model}{columns}{$property}{not_null}  = 1 if $property eq $m->{'x-dbic-key'};
+            }
+        }
+
+        if ( my $pk = $m->{'x-dbic-key'} ) {
+            $schema{$model}{primary_key} = $pk;
+        }
+
+    }
+
+    return \%schema;
+}
+
+sub sql_output {
+    my ( $schema ) = @_;
+    $tt->process('sql_schema.tt',{ 
+        schema => $schema
+    },'db/schema.sql' )
+        or die $tt->error();               
 }
 
 sub pg_attr_type {

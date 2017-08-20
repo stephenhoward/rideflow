@@ -2,6 +2,7 @@ package RideFlow::Model::[% model_name %];
 
 use Moose;
 
+# attribute definitions for this class are here:
 extends 'RideFlow::Model::Attributes::[% model_name %]';
 
 1;

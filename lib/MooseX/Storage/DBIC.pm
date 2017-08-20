@@ -1,4 +1,4 @@
-package RideFlow::Model::Meta::DBIC;
+package MooseX::Storage::DBIC;
 
 use Moose::Role;
 
@@ -20,7 +20,7 @@ before '_process_options' => sub {
     }
 };
 
-package Moose::Meta::Attribute::Custom::Trait::RideFlowDBIC;
+package Moose::Meta::Attribute::Custom::Trait::DBIC;
     sub register_implementation { 
         'MooseX::Meta::Attribute::Trait::DBIC'
     };

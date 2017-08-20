@@ -34,7 +34,7 @@ package RideFlow::Model::Attributes::[% model_name %];
 use Moose;
 
 extends 'RideFlow::Model::Base';
-with 'RideFlow::Model::Meta::DBIC';
+with 'MooseX::Storage::DBIC';
 
 sub dbic { '[% model_name %]' }
 

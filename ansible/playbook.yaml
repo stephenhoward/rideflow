@@ -2,6 +2,10 @@
 - hosts: all
   vars:
     postgresql_dev_headers: yes
+    postgresql_authentication:
+      - type: local
+        user: rideflow
+        method: trust
   become: true
   become_user: root
   roles:

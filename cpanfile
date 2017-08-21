@@ -6,4 +6,6 @@ requires 'JSON::Validator::OpenAPI';
 requires 'Hash::Merge::Simple', '0.051';
 requires 'Template', '2.27';
 requires 'DBIx::Class';
+requires 'DBD::Pg', '3.6.2';
+requires 'MooseX::NonMoose', '0.26';
 requires 'MooseX::MarkAsMethods', '0.15';

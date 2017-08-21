@@ -1,11 +1,12 @@
 ---
 - hosts: all
   vars:
+    postgresql_dev_headers: yes
   become: true
   become_user: root
   roles:
-    - perl
     - ansible-postgresql
+    - perl
   tasks:
     - file:
         path: /rideflow/var/config
@@ -13,9 +14,13 @@
         mode: 0755
     - group: 
         name: rideflow
+        gid: 300
+    - group:
+        name: dev
     - user:
         name: rideflow
         group: rideflow
+        uid: 300
         comment: "RideFlow app user"
     - user:
         name: dev
@@ -28,7 +33,7 @@
         dest: /home/dev/rideflow
         state: link
         owner: dev
-        group: rideflow
+        group: dev
 - hosts: all
   become: true
   become_user: postgres

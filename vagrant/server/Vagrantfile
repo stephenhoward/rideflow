@@ -14,7 +14,8 @@ Vagrant.configure("2") do |config|
           vb.cpus   = 2
       end
 
-      node.vm.synced_folder "../../", synced_folder
+      node.vm.synced_folder "../../", synced_folder,
+          mount_options: ["uid=300,gid=300"]
 
       node.vm.provision "shell" do |shell|
           shell.name   = "set symlink to code base"

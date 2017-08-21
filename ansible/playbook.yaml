@@ -29,7 +29,11 @@
         state: link
         owner: dev
         group: rideflow
-
+- hosts: all
+  become: true
+  become_user: postgres
+  roles:
+    - postgres
 
     
 

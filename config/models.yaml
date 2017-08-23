@@ -7,6 +7,15 @@ rider_class:
         - Adult
         - Youth
         - Senior
+payment_class:
+    description: how rides and passes have been paid for
+    type: string
+    enum:
+        - Cash
+        - Debit
+        - Credit
+        - Promotion
+        - Complimentary
 Identifiable:
     description: role for things with a uuid
     type: object
@@ -63,8 +72,8 @@ Updateable:
                   x-rideflow-scope: protected
                   type: string
                   format: date-time
-Token:
-    description: a single-use credit for riding the transit system
+Pass:
+    description: a credit for riding the transit system
     x-rideflow-scope: protected
     x-dbic-table: passes
     allOf:
@@ -75,14 +84,6 @@ Token:
                   type:   string
                   format: date-time
                   description: Date Purchased/Created
-TokenPass:
-    description: A way to purchase multiple rides at a time
-    x-rideflow-scope: protected
-    x-dbic-table: passes
-    allOf:
-        - $ref: '#/definitions/Token'
-        - type: object
-          properties:
               rides:
                   type: integer
                   format: int32
@@ -91,35 +92,27 @@ TokenPass:
                   type: integer
                   format: int32
                   description: Rides remaining
-TimePass:
-    description: a time-based credit for riding the transit system
-    x-rideflow-scope: protected
-    x-dbic-table: passes
-    allOf:
-      - $ref: '#/definitions/Token'
-      - type: object
-        properties:
-            class:
-                $ref: '#/definitions/rider_class'
-            duration:
-                type: integer
-                format: int32
-                description: Value of pass
-            duration_type:
-                type: string
-                description: units 'duration' is measured in
-                enum:
-                    - hours
-                    - days
-                    - weeks
-                    - months
-            date_expires:
-                type:   string
-                format: date-time
-                description: Last day pass is valid
-            guest_id:
-                type: string
-                description: Identifier for partner program
+              class:
+                  $ref: '#/definitions/rider_class'
+              duration:
+                  type: integer
+                  format: int32
+                  description: Value of pass
+              duration_type:
+                  type: string
+                  description: units 'duration' is measured in
+                  enum:
+                      - hours
+                      - days
+                      - weeks
+                      - months
+              date_expires:
+                  type:   string
+                  format: date-time
+                  description: Last day pass is valid
+              guest_id:
+                  type: string
+                  description: Identifier for partner program
 PassGroup:
     description: a set of passes maintained by a smart device (so a family could board with a single swipe, for example)
     allOf:
@@ -129,7 +122,7 @@ PassGroup:
               passes:
                   type: array
                   items:
-                      $ref: '#/definitions/Token'
+                      $ref: '#/definitions/Pass'
 Route:
     description: A set of stops
     x-dbic-table: routes
@@ -160,18 +153,9 @@ Stop:
           properties:
               name:
                   type: string
-              eta:
-                  description: Information about the next vehicle arriving at this stop
-                  type: object
+              arrival:
                   x-dbic-ignore: true
-                  x-rideflow-scope: public
-                  properties:
-                      name:
-                          description: description of the vehicle arriving
-                          type: string
-                      minutes:
-                          description: number of minutes until the next vehicle arrives
-                          type: integer
+                  $ref: '#/definitions/Arrival'
               routes:
                   type: array
                   x-dbic-rel: many_to_many
@@ -181,6 +165,17 @@ Stop:
                   x-dbic-bridge: '#/definitions/RouteStop'
                   items:
                     $ref: '#/definitions/Route'
+Arrival:
+    description: Information about the next vehicle arriving at this stop
+    type: object
+    x-rideflow-scope: public
+    properties:
+        name:
+            description: description of the vehicle arriving
+            type: string
+        minutes:
+            description: number of minutes until the next vehicle arrives
+            type: integer
 RouteStop:
     description: many to many bridge for Routes and Stops
     x-rideflow-scope: storage
@@ -246,7 +241,7 @@ Ride:
                 x-rideflow-scope: private
                 x-dbic-rel: belongs_to
                 x-dbic-key: token_id
-                $ref: '#/definitions/Token'
+                $ref: '#/definitions/Pass'
             route_session:
                 x-rideflow-scope: private
                 x-dbic-rel: belongs_to

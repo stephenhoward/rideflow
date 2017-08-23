@@ -11,6 +11,9 @@ __PACKAGE__->add_columns(
 [%
 FOREACH property = model.properties.keys;
     p = model.properties.$property;
+
+    NEXT IF p.item('x-dbic-ignore');
+
     IF p.item('x-dbic-rel');
         IF p.item('x-dbic-rel') == 'belongs_to';
 %]

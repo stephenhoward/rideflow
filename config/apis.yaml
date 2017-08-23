@@ -211,7 +211,7 @@ apis:
                           in: body
                           required: true
                           schema:
-                              $ref: '#/definitions/Token'
+                              $ref: '#/definitions/Pass'
                     responses:
                         '501':
                             $ref: '#/responses/NotImplemented'
@@ -236,7 +236,7 @@ apis:
                         '200':
                             description: the newly created pass
                             schema:
-                                $ref: '#/definitions/Token'
+                                $ref: '#/definitions/Pass'
             '/passes/{pass_id}':
                 parameters:
                     - name: vendor_id
@@ -252,7 +252,7 @@ apis:
                         '200':
                             description: Information about the pass in the url
                             schema:
-                                $ref: '#/definitions/Token'
+                                $ref: '#/definitions/Pass'
             '/vendors/{vendor_id}':
                 parameters:
                     - name: vendor_id

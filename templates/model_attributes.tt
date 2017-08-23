@@ -40,7 +40,7 @@ with 'MooseX::Storage::DBIC';
 sub dbic { '[% model_name %]' }
 
 [% FOREACH property = model.properties.keys; %]
-has '[% property %]' => ( is => 'rw', isa => [% attr_type(model.properties.$property) %], traits => ['DBIC'] );
+has '[% property %]' => ( is => 'rw', isa => [% attr_type(model.properties.$property) %][% ", traits => ['DBIC']" UNLESS model.properties.$property.item('x-dbic-ignore') %] );
 [% END %]
 
 1;

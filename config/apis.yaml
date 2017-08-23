@@ -275,6 +275,18 @@ apis:
             version: "1.0"
         basePath: /v1
         paths:
+            /routes:
+                get:
+                    $ref: '#/apis/public/paths/routes/get'
+                post:
+                    description: create a new route
+                    parameters:
+                        $ref: '#/definitions/Route'
+                    responses:
+                        '200':
+                            description: newly created route
+                            schema:
+                                $ref: '#/definitions/Route'
             /sessions:
                 get:
                     description: List route session history

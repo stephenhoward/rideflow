@@ -1,0 +1,23 @@
+---
+- name: install nginx
+  apt:
+    name: nginx
+    update_cache: yes
+
+- name: link nginx conf file
+  file:
+    src: /rideflow/config/nginx.conf
+    dest: /etc/nginx/conf.d/rideflow.conf
+    state: link
+    owner: rideflow
+    group: rideflow
+
+- name: configure nginx to start on boot
+  service:
+    name: nginx
+    enabled: yes
+
+- name: start nginx
+  service:
+    name: nginx
+    state: started

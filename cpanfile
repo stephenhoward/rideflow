@@ -11,3 +11,7 @@ requires 'List::MoreUtils::XS', '0.423'; # required by List::MoreUtils, which is
 requires 'MooseX::NonMoose', '0.26';
 requires 'DBIx::Class';
 requires 'DBD::Pg', '3.6.2';
+
+#required for Javascript::Compile
+requires "Path::Tiny", '0.104';
+requires "JavaScript::Minifier::XS", '0.11';

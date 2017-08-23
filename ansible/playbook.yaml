@@ -12,6 +12,7 @@
     - ansible-postgresql
     - perl
     - nginx
+    - www
   tasks:
     - file:
         path: /rideflow/var/config

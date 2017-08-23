@@ -1,0 +1,10 @@
+---
+- name: install ruby
+  apt:
+    name: ruby
+    update_cache: yes
+- name: install ruby-dev
+  apt:
+    name: ruby-dev
+- name: install sass
+  shell: gem install sass

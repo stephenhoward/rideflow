@@ -4,6 +4,11 @@
     name: nginx
     update_cache: yes
 
+- file:
+    path: /rideflow/var/static
+    state: directory
+    mode: 0755
+
 - name: link nginx conf file
   file:
     src: /rideflow/config/nginx.conf
@@ -11,6 +16,12 @@
     state: link
     owner: rideflow
     group: rideflow
+
+- name: 'add nginx user to rideflow group'
+  user:
+    name: data-www
+    groups: rideflow
+    append: yes
 
 - name: configure nginx to start on boot
   service:

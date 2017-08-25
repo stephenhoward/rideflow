@@ -8,10 +8,10 @@
         <div id="rfapp">
         <header>
             <nav>
-                <li><router-link to="/routes">{{   $t( "nav.routes"   ) }}</router-link></li>
-                <li><router-link to="/vehicles">{{ $t( "nav.vehicles" ) }}</router-link></li>
-                <li><router-link to="/drivers">{{  $t( "nav.drivers"  ) }}</router-link></li>
-                <li><router-link to="/rides">{{    $t( "nav.rides"    ) }}</router-link></li>
+                <li><router-link to="/routes">{{   $t( "routes.nav"   ) }}</router-link></li>
+                <li><router-link to="/vehicles">{{ $t( "vehicles.nav" ) }}</router-link></li>
+                <li><router-link to="/drivers">{{  $t( "drivers.nav"  ) }}</router-link></li>
+                <li><router-link to="/rides">{{    $t( "rides.nav"    ) }}</router-link></li>
             </nav>
         </header>
         <main>
@@ -30,4 +30,22 @@
     <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
     <script src="/static/js/app.js"></script>
 
+    <div class="routes template">
+        <h2>{{ $t( "routes.title" ) }}</h2>
+        <button v-on:click="add_route" v-bind:title="$t('routes.add_title')"type="button">+</button>
+    </div>
+    <div class="vehicles template">
+        <h2>{{ $t( "vehicles.title" ) }}</h2>
+        <button v-on:click="add" v-bind:title="$t('vehicles.add_title')"type="button">+</button>
+    </div>
+    <div class="drivers template">Drivers</div>
+    <div class="rides template">Rides</div>
+    <div class="vehicle template">
+        <h2>{{ model.name }}</h2>
+        
+    </div>
+    <div class="edit_vehicle template">
+    <input type="text" v-bind:placeholder="$t('vehicle.name')">
+    <button type="btn" >{{ $t("vehicle.create") }}</button>
+    </div>
 </html>

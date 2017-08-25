@@ -1,0 +1,26 @@
+
+[% FOREACH model IN models.pairs %]
+class [% model.key %] extends Model {
+    definition() {
+        return {
+            [%- FOREACH property IN model.value.properties.pairs %]
+            "[% property.key %]" : [%
+
+            IF property.value.type == 'array';
+                '[]';
+            ELSIF property.value.type == 'string';
+                "''";
+            ELSIF property.value.type == 'number' || property.value.type == 'integer';
+                "0";
+            ELSIF property.value.type == 'boolean';
+                "false";
+            ELSE;
+                'null';
+            END;
+
+            %][% ',' UNLESS loop.last %]
+            [%- END %]
+        };
+    }
+}
+[% END %]

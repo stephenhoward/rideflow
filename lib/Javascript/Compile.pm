@@ -5,6 +5,7 @@ use warnings;
 
 use JavaScript::Minifier::XS 'minify';
 use Path::Tiny;
+use List::Util 'first';
 
 use base 'Exporter';
 
@@ -13,23 +14,31 @@ our @EXPORT_OK = qw( compile_js );
 sub compile_js {
     my ( $src, $dest, $no_minify ) = @_;
 
+    $src = [ $src ] unless ( ref( $src ) || '') eq 'ARRAY';
+
     my %paths = (
-        bin      => path( $src, '/bin' ),
-        lib      => path( $src, '/lib' ),
+        bin      => [ map { path( $_, '/bin' ) } grep { $_ ne $dest } @$src ],
+        lib      => [ map { path( $_, '/lib' ) } @$src ],
         compiled => path( $dest )
     );
 
     $paths{compiled}->mkpath if ! $paths{compiled}->exists;
 
-    my $iterator = $paths{bin}->iterator({
-        recurse => 1,
-        follow_symlinks => 0,
-    });
+    foreach my $bin ( @{$paths{bin}} ) {
 
-    while ( my $path = $iterator->() ) {
-        if ( $path->is_file && $path->basename =~ /\.js$/ ) {
-            compile_script( $path, \%paths, $no_minify );
+        $paths{current_bin} = $bin;
+
+        my $iterator = $bin->iterator({
+            recurse => 1,
+            follow_symlinks => 0,
+        });
+
+        while ( my $path = $iterator->() ) {
+            if ( $path->is_file && $path->basename =~ /\.js$/ ) {
+                compile_script( $path, \%paths, $no_minify );
+            }
         }
+
     }
 }
 
@@ -38,7 +47,7 @@ sub compile_script {
     my %files_seen;
 
     my $file_string = include_script( $path, $paths, \%files_seen );
-    my $relpath     = $paths->{compiled}->child( $path->relative( $paths->{bin} ) );
+    my $relpath     = $paths->{compiled}->child( $path->relative( $paths->{current_bin} ) );
 
     $relpath->parent->mkpath if ! $relpath->parent->exists;
     $relpath->spew( $no_minify ? $file_string : minify($file_string) );
@@ -52,7 +61,6 @@ sub include_script {
     my @includes;
     my @lines = $path->lines;
 
-warn "processing ".$path->stringify."\n";
     foreach my $line ( @lines ) {
 
         if( $line =~ m{ ^   # on its own line
@@ -62,7 +70,7 @@ warn "processing ".$path->stringify."\n";
             \s+ \*/         # close js block comment
             \s* $           # end of line
         }x ) {
-            my $include = $paths->{lib}->child($1);
+            my $include = first { $_->exists } map { $_->child($1) } @{$paths->{lib}};
             if ( ! defined $files_seen->{ $include->stringify } ) {
                 push @includes, include_script( $include, $paths, $files_seen );
             }

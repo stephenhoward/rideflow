@@ -65,6 +65,13 @@ while ( my ( $name, $api) = each %{$apis->{apis}} ) {
     };
 
     DumpFile('var/config/'.$name.'.swagger.yaml', $output );
+
+    if ( $name eq 'manage' ) {   
+        $tt->process('javascript_models.tt', {
+            models => clone_merge( \%definitions, \%other_definitions ),
+            }, 'var/static/js/lib/models.js')
+                or die $tt->error();
+    }
 }
 
 sub model_output {

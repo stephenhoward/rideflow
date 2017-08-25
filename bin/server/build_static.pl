@@ -9,7 +9,7 @@ my $which = $ARGV[0] || 'all';
 
 if ( $which eq 'js' || $which eq 'all' ) {
 
-    Javascript::Compile::compile_js( '/rideflow/static/js' => '/rideflow/var/static/js', 1 );
+    Javascript::Compile::compile_js( [ '/rideflow/static/js', '/rideflow/var/static/js' ] => '/rideflow/var/static/js', 1 );
 }
 
 if ( $which eq 'css' || $which eq 'all' ) {

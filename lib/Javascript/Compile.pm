@@ -11,7 +11,7 @@ use base 'Exporter';
 our @EXPORT_OK = qw( compile_js );
 
 sub compile_js {
-    my ( $src, $dest ) = @_;
+    my ( $src, $dest, $no_minify ) = @_;
 
     my %paths = (
         bin      => path( $src, '/bin' ),
@@ -28,20 +28,20 @@ sub compile_js {
 
     while ( my $path = $iterator->() ) {
         if ( $path->is_file && $path->basename =~ /\.js$/ ) {
-            compile_script( $path, \%paths );
+            compile_script( $path, \%paths, $no_minify );
         }
     }
 }
 
 sub compile_script {
-    my ( $path, $paths ) = @_;
+    my ( $path, $paths, $no_minify ) = @_;
     my %files_seen;
 
     my $file_string = include_script( $path, $paths, \%files_seen );
     my $relpath     = $paths->{compiled}->child( $path->relative( $paths->{bin} ) );
 
     $relpath->parent->mkpath if ! $relpath->parent->exists;
-    $relpath->spew( minify($file_string) );
+    $relpath->spew( $no_minify ? $file_string : minify($file_string) );
 }
 
 sub include_script {

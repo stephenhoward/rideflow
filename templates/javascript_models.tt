@@ -21,6 +21,15 @@ class [% model.key %] extends Model {
             %][% ',' UNLESS loop.last %]
             [%- END %]
         };
+
     }
+
+    [%- FOREACH property IN model.value.properties.pairs %]
+    get [% property.key %]()    { return this._get('[% property.key %]');      }
+    set [% property.key %](val) { return this._set('[% property.key %]',val);  }
+    [% END %]
+
+
+
 }
 [% END %]

@@ -12,8 +12,8 @@ class Model {
         return {};
     }
 
-    set(k,v) {
-        if ( this.definition()[k] ) {
+    _set(k,v) {
+        if ( k in this.definition() ) {
             this.properties[k] = v;
 
             return this.properties[k];
@@ -21,34 +21,37 @@ class Model {
         return null;
     }
 
-    get(k) {
-        if ( this.definition()[k] ) {
+    _get(k) {
+        if ( k in this.definition() ) {
             return this.properties[k];
         }
         return null;
     }
 
-    save() {
+    save(url) {
         var defer = $.Deferred();
-        $.post(this.url,JSON.stringify(this.properties)).done( (json) => {
-            defer.resolve();
+        $.post(url,JSON.stringify(this.properties)).done( (json) => {
+            for( let k of Object.keys(json) ) {
+                this._set(k,json[k]);
+            }
+            defer.resolve(this);
         });
 
         return defer.promise();
     }
 
-    static load(id) {
+    static load(url) {
         var defer = $.Deferred();
-        $.getJSON(this.url + '/' + id).done( (json) => {
+        $.getJSON(url).done( (json) => {
             defer.resolve( new this(json) );
         });
 
         return defer.promise();
     }
 
-    static list() {
+    static list(url) {
         var defer = $.Deferred();
-        $.getJSON(this.url).done( (json) => {
+        $.getJSON(url).done( (json) => {
 
             defer.resolve( json.map( (item) => {
                 return new this(item);

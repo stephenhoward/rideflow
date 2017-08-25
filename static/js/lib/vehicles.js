@@ -44,7 +44,10 @@ $(function() {
         },
         methods: {
             fetchData: function() {
-                console.log('fetching...?');
+                this.model = new Vehicle({});
+            },
+            saveData: function() {
+                this.model.save('/vehicles');
             }
         }
     };

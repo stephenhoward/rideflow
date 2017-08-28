@@ -2,14 +2,14 @@
 
 $(function() {
 
-    window.rfVehicles = {
-        template: ht('div.vehicles'),
-        data: function(){
+    window.ListVueMixin = {
+        data: () => {
             return {
                 loading : false,
-                models  : [],
+                models  : [
+                ],
                 error   : null
-            };
+            };            
         },
         created: function() {
             this.fetchData();
@@ -18,17 +18,47 @@ $(function() {
             '$route': 'fetchData'
         },
         methods: {
+            type: function() { return null },
+            url:  function() { return ''   },
+
             add: function() {
-                this.$router.push('/vehicles/new');
+                this.$router.push( this.url() + '/new' );
             },
             fetchData: function() {
-                console.log('get list of data...');
+                let defer = $.Deferred();
+
+                $.getJSON( this.url() ).done( (json) => {
+
+                    let type = this.type();
+                    this.models = json.map( (item) => {
+                        return new type(item);
+                    });
+                });
+                return defer.promise();
             }
         }
     };
 
-    window.rfEditVehicle = {
-        template: ht('div.edit_vehicle'),
+    window.rfVehicles = {
+        template: ht('div.vehicles'),
+        mixins: [ ListVueMixin ],
+
+        methods: {
+            type: () => { return Vehicle },
+            url:  () => { return '/vehicles' }
+        }
+    };
+
+    Vue.component('vehicle-summary',{
+        template: ht('li.vehicle-summary'),
+        props: ['model'],
+        data: function() {
+            return {};
+        }
+    });
+
+    window.EditVueMixin = {
+        props: ['id'],
         data: function() {
             return {
                 loading: false,
@@ -40,15 +70,45 @@ $(function() {
             this.fetchData();
         },
         watch: {
-            '$route': 'fetchData'
+           '$route': 'fetchData' 
         },
         methods: {
             fetchData: function() {
-                this.model = new Vehicle({});
+                let defer = $.Deferred();
+                if ( ! this.model ) {
+                    let type = this.type();
+                    this.model = new type({});
+                    if ( this.id ) {
+                        type.load(this.url() + '/'+this.id).done( (model) => {
+                            this.model = model;
+                            defer.resolve(this.model);
+                        });
+                    }
+                }
+                else {
+                    defer.resolve(this.model);
+                }
+                return defer.promise();
             },
             saveData: function() {
-                this.model.save('/vehicles');
+                if ( this.model.id ) {
+                    this.model.save( this.url() + '/' + this.model.id );
+                }
+                else {
+                    this.model.save( this.url() );
+                }
             }
+        }
+
+    }
+
+    window.rfEditVehicle = {
+        template: ht('div.edit_vehicle'),
+        mixins: [ EditVueMixin ],
+
+        methods: {
+            type: () => { return Vehicle },
+            url:  () => { return '/vehicles' }
         }
     };
 

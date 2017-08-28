@@ -37,13 +37,21 @@
     <div class="vehicles template">
         <h2>{{ $t( "vehicles.title" ) }}</h2>
         <button v-on:click="add" v-bind:title="$t('vehicles.add_title')"type="button">+</button>
+        <ul>
+            <vehicle-summary v-for="model in models" :key="model.id" :model="model"></vehicle-summary>
+        </ul>    
     </div>
     <div class="drivers template">Drivers</div>
     <div class="rides template">Rides</div>
+
     <div class="vehicle template">
         <h2>{{ model.name }}</h2>
-        
     </div>
+
+    <li class="vehicle-summary template">
+        <router-link :to="'/vehicles/' + model.id + '/edit'">{{ model.name }}</router-link>
+    </li>
+
     <div class="edit_vehicle template">
     <input type="text" v-model="model.name" v-bind:placeholder="$t('vehicle.name')">
     <button v-on:click="saveData" type="btn" >{{ $t("vehicle.create") }}</button>

@@ -14,8 +14,8 @@ $(function(){
       { path: '/routes', component: rfRoutes },
       { path: '/vehicles', component: rfVehicles },
       { path: '/vehicles/new', component: rfEditVehicle },
-      { path: '/vehicles/:id', component: rfVehicle },
-      { path: '/vehicles/:id/edit', component: rfEditVehicle },
+      { path: '/vehicles/:id', component: rfVehicle, props: true },
+      { path: '/vehicles/:id/edit', component: rfEditVehicle, props: true },
       { path: '/drivers',  component: Drivers },
       { path: '/rides',    component: Rides }
     ];

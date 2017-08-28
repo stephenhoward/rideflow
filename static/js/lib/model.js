@@ -1,3 +1,5 @@
+let model_cache = {};
+
 class Model {
     constructor(properties) {
         this.properties = {};
@@ -42,8 +44,14 @@ class Model {
 
     static load(url) {
         var defer = $.Deferred();
+
+        if( model_cache[url] ) {
+            return defer.resolve( model_cache[url] );
+        }
+
         $.getJSON(url).done( (json) => {
-            defer.resolve( new this(json) );
+            model_cache[url] = new this(json);
+            defer.resolve( model_cache[url] );
         });
 
         return defer.promise();

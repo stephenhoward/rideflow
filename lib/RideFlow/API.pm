@@ -8,10 +8,13 @@ sub startup {
 
     my $rideflow_app = $ENV{RIDEFLOW_APP};
 
+    $app->log( Mojo::Log->new( path => 'var/log/' . $rideflow_app . '.log', level => 'debug' ));
     $app->plugin( YamlConfig => {
-        file => $app->home->rel_file('config/config.yaml'), class => 'YAML::XS'
+        file => $app->home->rel_file('config/'.$app->mode.'.config.yaml'), class => 'YAML::XS'
     } );
-   $app->plugin( OpenAPI => {
+    $app->config( hypnotoad => $app->config->{ht}{$rideflow_app} );
+
+    $app->plugin( OpenAPI => {
         url  => $app->home->rel_file( 'var/config/' . $rideflow_app . '.swagger.yaml')
     } );
 

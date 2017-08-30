@@ -9,10 +9,33 @@
     state: directory
     mode: 0755
 
-- name: link nginx conf file
+- file:
+    path: /rideflow/var/config/nginx
+    state: directory
+    mode: 0755
+
+- name: remove static sites-available directory
   file:
-    src: /rideflow/config/nginx.conf
-    dest: /etc/nginx/conf.d/rideflow.conf
+    path: /etc/nginx/sites-available
+    state: absent
+
+- name: remove static sites-enabled directory
+  file:
+    path: /etc/nginx/sites-enabled
+    state: absent
+
+- name: link nginx conf files
+  file:
+    src: /rideflow/var/config/nginx
+    dest: /etc/nginx/sites-available
+    state: link
+    owner: rideflow
+    group: rideflow
+
+- name: enable all sites-available
+  file:
+    src: /etc/nginx/sites-available
+    dest: /etc/nginx/sites-enabled
     state: link
     owner: rideflow
     group: rideflow

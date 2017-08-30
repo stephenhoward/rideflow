@@ -1,0 +1,35 @@
+nginx:
+    vend: 
+        name: vendapi.ourtransit.com
+        port: 80
+    ride:
+        name: rideapi.ourtransit.com
+        port: 80
+    manage:
+        name: 172.28.128.3
+        port: 80
+    public:
+        name: api.ourtransit.com
+        port: 443
+db:
+    dsn: dbi:Pg:dbname=rideflow;host=localhost
+    user: rideflow
+    password: rideflow
+
+ht:
+    public:
+        listen:
+            - 'http://localhost:8080'
+        proxy: 1
+    ride:
+        listen:
+            - 'http://localhost:8070'
+        proxy: 1
+    vend:
+        listen:
+            - 'http://localhost:8060'
+        proxy: 1
+    manage:
+        listen:
+            - 'http://localhost:8080'
+        proxy: 1

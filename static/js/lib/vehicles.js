@@ -27,7 +27,7 @@ $(function() {
             fetchData: function() {
                 let defer = $.Deferred();
 
-                $.getJSON( this.url() ).done( (json) => {
+                $.getJSON( '/v1' + this.url() ).done( (json) => {
 
                     let type = this.type();
                     this.models = json.map( (item) => {
@@ -79,7 +79,7 @@ $(function() {
                     let type = this.type();
                     this.model = new type({});
                     if ( this.id ) {
-                        type.load(this.url() + '/'+this.id).done( (model) => {
+                        type.load( '/v1' + this.url() + '/'+this.id).done( (model) => {
                             this.model = model;
                             defer.resolve(this.model);
                         });
@@ -92,10 +92,10 @@ $(function() {
             },
             saveData: function() {
                 if ( this.model.id ) {
-                    this.model.save( this.url() + '/' + this.model.id );
+                    this.model.save( '/v1' + this.url() + '/' + this.model.id );
                 }
                 else {
-                    this.model.save( this.url() );
+                    this.model.save( '/v1' + this.url() );
                 }
             }
         }

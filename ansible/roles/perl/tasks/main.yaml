@@ -13,3 +13,12 @@
   environment:
     PERL_MM_USE_DEFAULT: 1
   command: cpanm --installdeps /root/
+
+- name: set up PERL5LIB
+  shell: 'echo "\nexport PERL5LIB=/rideflow/lib:/rideflow/var/lib\n" >> /home/dev/.profile'
+
+- name: set up server mode (MOJO_MODE)
+  shell: 'echo "\nexport PLACK_ENV=development\n" >> /home/dev/.profile'
+
+- name: set up server mode (PLACK_ENV)
+  shell: 'echo "\nexport MOJO_MODE=development\n" >> /home/dev/.profile'

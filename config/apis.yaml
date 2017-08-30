@@ -275,13 +275,34 @@ apis:
             version: "1.0"
         basePath: /v1
         paths:
+            /vehicles:
+                get:
+                    tags:
+                        - vehicles
+                    description: Returns a list of vehicles in the system
+                    x-mojo-to: 'vehicle#list'
+                    responses:
+                        '200':
+                            description: A list of vehicles
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/definitions/Vehicle'
             /routes:
                 get:
-                    $ref: '#/apis/public/paths/routes/get'
+                    tags:
+                        - routes
+                    description: Returns a list of all routes in the system
+                    x-mojo-to: 'route#list'
+                    responses:
+                        '200':
+                            description: A list of routes
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/definitions/Route'
                 post:
                     description: create a new route
-                    parameters:
-                        $ref: '#/definitions/Route'
                     responses:
                         '200':
                             description: newly created route

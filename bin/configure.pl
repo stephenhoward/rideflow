@@ -12,7 +12,7 @@ use Template;
 
 my $models  = LoadFile('config/models.yaml');
 my $apis    = LoadFile('config/apis.yaml');
-my $config  = LoadFile('config/config.yaml');
+my $config  = LoadFile('config/development.config.yaml');
 my %dbix_classes;
 my $model_link = qr{#/definitions/([^\/]+)$};
 
@@ -57,7 +57,7 @@ while ( my ( $name, $api) = each %{$apis->{apis}} ) {
 
     my $output = {
         swagger => $apis->{swagger},
-        host => $config->{server}{$name} || '',
+        #host =>     $config->{nginx}{$name} || '',
         responses => $apis->{responses},
         %{$apis->{apis}{defaults}},
         %$api,
@@ -72,6 +72,12 @@ while ( my ( $name, $api) = each %{$apis->{apis}} ) {
             }, 'var/static/js/lib/models.js')
                 or die $tt->error();
     }
+
+    $tt->process('nginx.conf.tt', {
+        server => $name,
+        config => $config,
+        }, 'var/config/nginx/'.$config->{nginx}{$name}{name})
+            or die $tt->error();
 }
 
 sub model_output {

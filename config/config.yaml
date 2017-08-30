@@ -1,9 +1,0 @@
-server:
-    vend:   vend.ourtransit.com:6443
-    ride:   ride.ourtransit.com:7443
-    manage: manage.ourtransit.com:8443
-    public: api.ourtransit.com:443
-db:
-  dsn: dbi:Pg:dbname=rideflow;host=localhost
-  user: rideflow
-  password: rideflow

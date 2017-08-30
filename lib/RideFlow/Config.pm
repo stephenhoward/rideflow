@@ -9,7 +9,8 @@ use base 'Exporter';
 
 our @EXPORT_OK = qw( configure );
 
-our $config = LoadFile( 'config/config.yaml' );
+our $mode   = $ENV{MOJO_MODE} || $ENV{PLACK_ENV} || 'production';
+our $config = LoadFile( "config/$mode.config.yaml" );
 
 sub configure { 
 

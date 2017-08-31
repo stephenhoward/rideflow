@@ -23,6 +23,7 @@ Identifiable:
     properties:
       id:
           type:   string
+          readOnly: true
           format: uuid
           x-rideflow-scope: public
 Locatable:
@@ -284,6 +285,8 @@ Vehicle:
     allOf:
         - $ref: '#/definitions/Identifiable'
         - type: object
+          required:
+            - name
           properties:
             name:
               type: string

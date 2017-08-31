@@ -288,6 +288,17 @@ apis:
                                 type: array
                                 items:
                                     $ref: '#/definitions/Vehicle'
+                post:
+                    tags:
+                        - vehicles
+                    description: add a new vehicle
+                    x-mojo-to: 'vehicle#create'
+                    responses:
+                        '200':
+                            description: The newly created vehicle
+                            schema:
+                                $ref: '#/definitions/Vehicle'
+
             /routes:
                 get:
                     tags:

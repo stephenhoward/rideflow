@@ -6,10 +6,6 @@ use RideFlow::DB;
 
 my $schema;
 
-has '_result',
-    is  => 'rw',
-    isa => 'Maybe[Object]';
-
 sub list {
     my( $class ) = @_;
 
@@ -28,22 +24,45 @@ sub _schema {
 sub _new_from_db {
     my ( $class, $db_result ) = @_;
 
-    return $class->new( _result => $db_result );
+    return $class->new( _dbic_result => $db_result );
 }
 
 sub _save {
     my ( $self ) = @_;
 
-    if ( $self->_result ) {
-        $self->_result->update
+    if ( $self->_dbic_result ) {
+        $self->_dbic_result->update
     }
     else {
-        $self->_result( $self->schema->resultset( $self->dbic )->create(
+        $self->_dbic_result( $self->schema->resultset( $self->dbic )->create(
 
         ));
     }
 
     return $self;
+}
+
+sub dump {
+    my ( $self ) = @_;
+
+    return {
+        map { $_ => $self->_dump_attribute( $self->$_ ) }
+            @{$self->_dbic_attrs}
+    };
+}
+
+sub _dump_attribute {
+    my ( $self, $value ) = @_;
+
+    return $value if ! ref $value;
+
+    return [ map { $self->_dump_attribute($_) } @$value ] if ref $value eq 'ARRAY';
+
+    return { map { $_ => $self->_dump_attribute( $value->{$_} ) } keys %$value } if ref $value eq 'HASH';
+
+    return $value->dump if $value->isa('RideFlow::Model::Base');
+
+    return undef;
 }
 
 1;

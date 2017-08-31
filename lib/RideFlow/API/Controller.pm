@@ -9,4 +9,12 @@ sub list {
     $c->render( openapi => $c->models( $c->model )->list() );
 }
 
+sub create {
+    my $c = $_[0]->openapi->valid_input or return;
+
+    my $model = $c->models( $c->model )->new($data);
+
+    $c->render( openapi => $model->dump );
+}
+
 1;

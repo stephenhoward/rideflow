@@ -32,11 +32,18 @@ class Model {
 
     save(url) {
         var defer = $.Deferred();
-        $.post(url,JSON.stringify(this.properties)).done( (json) => {
+        var self  = this;
+        $.ajax({
+            url         : url,
+            type        : 'POST',
+            dataType    : 'json',
+            contentType : 'application/json; charset=utf-8',
+            data        : JSON.stringify(self.properties)
+        }).done( (json) => {
             for( let k of Object.keys(json) ) {
-                this._set(k,json[k]);
+                self._set(k,json[k]);
             }
-            defer.resolve(this);
+            defer.resolve(self);
         });
 
         return defer.promise();

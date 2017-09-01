@@ -13,18 +13,12 @@ sub list {
         map {
             $class->_new_from_db($_);
         }
-        @{$class->_schema->resultset( $class->dbic )->search()->all() || []}
+        $class->_schema->resultset( $class->dbic )->search()
     ];
 }
 
 sub _schema {
     $schema ||= RideFlow::DB->db_connect();
-}
-
-sub _new_from_db {
-    my ( $class, $db_result ) = @_;
-
-    return $class->new( _dbic_result => $db_result );
 }
 
 sub save {

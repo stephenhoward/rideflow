@@ -6,7 +6,7 @@ use RideFlow::Model;
 sub list {
     my $c = $_[0]->openapi->valid_input or return;
 
-    $c->render( openapi => $c->models( $c->model )->list() );
+    $c->render( openapi => [ map { $_->dump } @{$c->models( $c->model )->list()} ] );
 }
 
 sub create {

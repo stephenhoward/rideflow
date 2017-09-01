@@ -17,7 +17,8 @@ has '_dbic_result',
         my ( $self ) = @_;
 
         return $self->_schema->resultset( $self->dbic )->new({
-            map { $_ => $self->$_ }
+            map  { $_ => $self->$_ }
+            grep { defined $self->$_ }
             @{$self->_dbic_attrs}
         });
     };
@@ -30,6 +31,18 @@ sub _dbic_attrs {
         grep { $_->does('DBIC') }
         $self->meta->get_all_attributes
     ];
+}
+
+sub _new_from_db {
+    my ( $class, $db_result ) = @_;
+
+    my $model = $class->new( _dbic_result => $db_result );
+
+    foreach my $attr ( grep { defined $db_result->$_ } @{$model->_dbic_attrs} ) {
+        $model->$attr( $db_result->$attr );
+    }
+
+    return $model;
 }
 
 package RideFlow::Model::Meta::Attribute::Trait::DBIC;

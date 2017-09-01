@@ -9,6 +9,14 @@ sub startup {
     my $rideflow_app = $ENV{RIDEFLOW_APP};
 
     $app->log( Mojo::Log->new( path => 'var/log/' . $rideflow_app . '.log', level => 'debug' ));
+    if ( $app->mode eq 'development' ) {
+        # don't swallow warnings:
+        $SIG{__WARN__} = sub {
+            @_ = ($app->log, shift);
+            goto &Mojo::Log::warn;
+        };       
+    }
+
     $app->plugin( YamlConfig => {
         file => $app->home->rel_file('config/'.$app->mode.'.config.yaml'), class => 'YAML::XS'
     } );

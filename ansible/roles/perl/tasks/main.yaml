@@ -9,6 +9,11 @@
 - name:  Install cpanm
   shell: curl -L http://cpanmin.us | perl - App::cpanminus
 
+- name: install uuid dependency
+  apt:
+    name: uuid-dev
+    update_cache: yes
+
 - name: install perl dependencies
   environment:
     PERL_MM_USE_DEFAULT: 1

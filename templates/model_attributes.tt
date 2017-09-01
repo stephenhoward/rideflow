@@ -34,6 +34,7 @@ package RideFlow::Model::Attributes::[% model_name %];
 
 use Moose;
 use Moose::Util::TypeConstraints 'enum';
+use UUID 'uuid';
 
 extends 'RideFlow::Model::Base';
 with 'MooseX::Storage::DBIC';
@@ -41,7 +42,11 @@ with 'MooseX::Storage::DBIC';
 sub dbic { '[% model_name %]' }
 
 [% FOREACH property = model.properties.keys; %]
-has '[% property %]' => ( is => 'rw', isa => [% attr_type(model.properties.$property) %][% ", traits => ['DBIC']" UNLESS model.properties.$property.item('x-dbic-ignore') %] );
+has '[% property %]' => ( is => 'rw', isa => [% attr_type(model.properties.$property) %][% ", traits => ['DBIC']" UNLESS model.properties.$property.item('x-dbic-ignore');
+IF model.properties.$property.format == 'uuid';
+    ', lazy => 1, default => sub { uuid() }';
+END;
+%] );
 [% END %]
 
 1;

@@ -27,16 +27,16 @@ sub _new_from_db {
     return $class->new( _dbic_result => $db_result );
 }
 
-sub _save {
+sub save {
     my ( $self ) = @_;
 
-    if ( $self->_dbic_result ) {
+    if ( $self->_dbic_result && $self->_dbic_result->in_storage ) {
         $self->_dbic_result->update
     }
     else {
-        $self->_dbic_result( $self->schema->resultset( $self->dbic )->create(
-
-        ));
+        $self->_dbic_result( $self->_schema->resultset( $self->dbic )->create(
+            $self->dump
+        ))->insert();
     }
 
     return $self;
@@ -46,8 +46,9 @@ sub dump {
     my ( $self ) = @_;
 
     return {
-        map { $_ => $self->_dump_attribute( $self->$_ ) }
-            @{$self->_dbic_attrs}
+        map  { $_ => $self->_dump_attribute( $self->$_ ) }
+        grep { defined $self->$_ }
+        @{$self->_dbic_attrs}
     };
 }
 

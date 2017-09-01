@@ -6,17 +6,6 @@ use RideFlow::DB;
 
 my $schema;
 
-sub list {
-    my( $class ) = @_;
-
-    return [
-        map {
-            $class->_new_from_db($_);
-        }
-        $class->_schema->resultset( $class->dbic )->search()
-    ];
-}
-
 sub _schema {
     $schema ||= RideFlow::DB->db_connect();
 }

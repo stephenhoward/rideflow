@@ -298,7 +298,17 @@ apis:
                             description: The newly created vehicle
                             schema:
                                 $ref: '#/definitions/Vehicle'
-
+            '/vehicles/{uuid}':
+                get:
+                    tags:
+                        - vehicles
+                    description: Returns a vehicle in the system
+                    x-mojo-to: 'vehicle#fetch'
+                    responses:
+                        '200':
+                            description: The vehicle identified by vehicle_id
+                            schema:
+                                $ref: '#/definitions/Vehicle'
             /routes:
                 get:
                     tags:

@@ -4,7 +4,12 @@ upstream [% server %]_rideflow {
 server {
     server_name [% config.nginx.$server.name %];
 
-    listen [% config.nginx.$server.ip %]:[% config.nginx.$server.port %];
+    listen [% config.nginx.$server.ip %]:[% config.nginx.$server.port %] ssl;
+
+    keepalive_timeout   70;
+
+    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
 
     gzip on;
     gzip_types text/css application/json application/javascript;

@@ -4,15 +4,15 @@ nginx:
     vend: 
         ip: 172.28.128.3
         name: vendapi.ourtransit.com
-        port: 80
+        port: 443
     ride:
         ip: 172.28.128.3
         name: rideapi.ourtransit.com
-        port: 80
+        port: 443
     manage:
         ip: 172.28.128.3
         name: manage.ourtransit.com
-        port: 80
+        port: 443
     public:
         ip: 172.28.128.3
         name: api.ourtransit.com

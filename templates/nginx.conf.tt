@@ -4,7 +4,7 @@ upstream [% server %]_rideflow {
 server {
     server_name [% config.nginx.$server.name %];
 
-    listen [% config.nginx.$server.port %];
+    listen [% config.nginx.$server.ip %]:[% config.nginx.$server.port %];
 
     gzip on;
     gzip_types text/css application/json application/javascript;

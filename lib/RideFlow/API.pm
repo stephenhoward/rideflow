@@ -30,7 +30,7 @@ sub startup {
         my ( $c, $model ) = @_;
 
         RideFlow::Model->m($model);
-   })
+   });
 }
 
 1;

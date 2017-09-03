@@ -1,0 +1,63 @@
+    diff --git a/lib/Mojo/JSON.pm b/lib/Mojo/JSON.pm
+    index be16aaf21..4be9d67c8 100644
+    --- a/lib/Mojo/JSON.pm
+    +++ b/lib/Mojo/JSON.pm
+    @@ -212,6 +212,10 @@ sub _encode_array {
+     
+     sub _encode_object {
+       my $object = shift;
+    +
+    +  return _encode_string('$ref') . ':' . _encode_value($object->{_ref} )
+    +      if ( $object->{_ref} );
+    +
+       my @pairs = map { _encode_string($_) . ':' . _encode_value($object->{$_}) }
+         sort keys %$object;
+       return '{' . join(',', @pairs) . '}';
+       
+    diff --git a/lib/JSON/Validator.pm b/lib/JSON/Validator.pm
+    index fd120d8..3f24746 100644
+    --- a/lib/JSON/Validator.pm
+    +++ b/lib/JSON/Validator.pm
+    @@ -293,21 +293,22 @@ sub _resolver {
+       for my $topic (@$refs) {
+         my $ref = delete $topic->{'$ref'} or next;    # already resolved?
+         $ref = "#/definitions/$ref" if $ref =~ /^\w+$/;    # TODO: Figure out if this could be removed
+    -    $ref = Mojo::Util::url_unescape($ref || '');
+    -    $ref = Mojo::URL->new($namespace)->fragment($ref) if $ref =~ s!^\#!!;
+    -    $ref = Mojo::URL->new($ref) unless ref $ref;
+    +    my $uri = Mojo::Util::url_unescape($ref || '');
+    +    $uri = Mojo::URL->new($namespace)->fragment($uri) if $uri =~ s!^\#!!;
+    +    $uri = Mojo::URL->new($uri) unless ref $uri;
+     
+    -    my $look_in = $self->_store(resolved => $ref);
+    +    my $look_in = $self->_store(resolved => $uri);
+         if (!$look_in) {
+    -      $look_in = $self->_load_schema($ref, $namespace);
+    +      $look_in = $self->_load_schema($uri, $namespace);
+           $look_in = $self->_resolve_schema($look_in, $look_in->data->{id} || $namespace);
+         }
+     
+    -    warn "[JSON::Validator] Resolving $ref\n" if DEBUG > 1;
+    -    warn Data::Dumper::Dumper($look_in->data) if DEBUG and $ref =~ /\b[c]\b/;   # follow the changes
+    -    my $data = $ref->fragment ? $look_in->get($ref->fragment) : $look_in->data;
+    -    die qq[Possibly a typo in schema? Could not find "$ref"] unless $data;
+    +    warn "[JSON::Validator] Resolving $uri\n" if DEBUG > 1;
+    +    warn Data::Dumper::Dumper($look_in->data) if DEBUG and $uri =~ /\b[c]\b/;   # follow the changes
+    +    my $data = $uri->fragment ? $look_in->get($uri->fragment) : $look_in->data;
+    +    die qq[Possibly a typo in schema? Could not find "$uri"] unless $data;
+         $topic->{$_} = $data->{$_} for keys %$data;
+    +    $topic->{_ref} = $ref;
+         unshift @$refs, $topic if $topic->{'$ref'} and !ref $topic->{'$ref'};
+         delete $topic->{id} if !ref $topic->{id} and $self->isa('JSON::Validator::OpenAPI');
+       }
+    @@ -631,7 +632,9 @@ sub _validate_type_object {
+         # Special case used internally when validating schemas: This module adds "id"
+         # on the top level which might conflict with very strict schemas, so we have to
+         # remove it again unless there's a rule.
+    -    local $rules{id} = 1 if !$path and exists $data->{id};
+    +    # It also adds "_ref" to track $ref links, and must be handled similarly.
+    +    local $rules{id}   = 1 if !$path and exists $data->{id};
+    +    local $rules{_ref} = 1 if exists $data->{_ref};
+     
+         if (my @keys = grep { !$rules{$_} } keys %$data) {
+           local $" = ', ';

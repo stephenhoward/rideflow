@@ -279,7 +279,7 @@ User:
               lastname:
                   type: string
 Vehicle:
-    description: a vehicle plys a route to trasport riders
+    description: a vehicle plys a route to transport riders
     x-dbic-table: vehicles
     x-rideflow-scope: protected
     allOf:
@@ -299,4 +299,8 @@ Vehicle:
                   - Train
             notes:
                 type: string
+            sessions:
+                x-dbic-rel: has_many
+                x-dbic-key: vehicle_id
+                $ref: '#/definitions/RouteSession'
 

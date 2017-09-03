@@ -197,6 +197,7 @@ sub process_model {
     my ( $name ) = @_;
 
     return $models->{$name} if defined $processed_models{$name};
+    $processed_models{$name}++;
 
     my $model = $models->{$name};
 
@@ -219,7 +220,6 @@ sub process_model {
 
     $models->{$name} = $model;
 
-    $processed_models{$name}++;
     return $model;
 }
 
@@ -233,7 +233,7 @@ sub process_properties {
 
             process_model($other_model);
 
-            if ( $models->{$other_model}{type} ne 'object' ) {
+            if ( ( $models->{$other_model}{type} // '' ) ne 'object' ) {
 
                 delete $info->{'$ref'};
                 $info->{$_} = $models->{$other_model}{$_} foreach keys %{$models->{$other_model}};

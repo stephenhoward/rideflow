@@ -302,5 +302,7 @@ Vehicle:
             sessions:
                 x-dbic-rel: has_many
                 x-dbic-key: vehicle_id
-                $ref: '#/definitions/RouteSession'
+                type: array
+                items:
+                    $ref: '#/definitions/RouteSession'
 

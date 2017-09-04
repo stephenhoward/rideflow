@@ -6,6 +6,9 @@ use MooseX::MarkAsMethods autoclean => 1;
 # table definition for this class is here:
 extends 'RideFlow::DB::Result::Attributes::[% model_name %]';
 
+# DBIx::Class requires we redeclare this:
+__PACKAGE__->table('[% model.item('x-dbic-table') %]');
+
 __PACKAGE__->meta->make_immutable;
 
 1;

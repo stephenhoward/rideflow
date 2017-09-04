@@ -324,6 +324,7 @@ apis:
                                     $ref: '#/definitions/Route'
                 post:
                     description: create a new route
+                    x-mojo-to: 'route#create'
                     responses:
                         '200':
                             description: newly created route

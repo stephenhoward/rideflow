@@ -139,7 +139,7 @@ Route:
                   x-dbic-rel: many_to_many
                   x-dbic-them: stop
                   x-dbic-bridge-name: route_stops
-                  x-dbic-me: route
+                  x-dbic-key: route_id
                   x-dbic-bridge: '#/definitions/RouteStop'
                   items:
                       $ref: '#/definitions/Stop'
@@ -162,7 +162,7 @@ Stop:
                   x-dbic-rel: many_to_many
                   x-dbic-them: route
                   x-dbic-bridge-name: route_stops
-                  x-dbic-me: stop
+                  x-dbic-key: stop_id
                   x-dbic-bridge: '#/definitions/RouteStop'
                   items:
                     $ref: '#/definitions/Route'

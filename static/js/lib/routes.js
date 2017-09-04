@@ -4,11 +4,21 @@ $(function() {
 
     window.rfRoutes = {
         template: ht('div.routes'),
+        mixins: [ ListVueMixin ],
+
         methods: {
-            add_route: function() {
-                alert('adding...');
-            }
+            type: () => { return Route },
+            url:  () => { return '/routes' }
         }
     };
 
+    window.rfEditRoute = {
+        template: ht('div.edit_route'),
+        mixins: [ EditVueMixin ],
+
+        methods: {
+            type: () => { return Route },
+            url:  () => { return '/routes' }
+        }
+    };
 });

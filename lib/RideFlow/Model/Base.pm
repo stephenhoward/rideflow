@@ -13,14 +13,7 @@ sub _schema {
 sub save {
     my ( $self ) = @_;
 
-    if ( $self->_dbic_result && $self->_dbic_result->in_storage ) {
-        $self->_dbic_result->update
-    }
-    else {
-        $self->_dbic_result( $self->_schema->resultset( $self->dbic )->create(
-            $self->dump
-        ))->insert();
-    }
+    $self->db_save;
 
     return $self;
 }

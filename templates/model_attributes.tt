@@ -41,12 +41,29 @@ with 'MooseX::Storage::DBIC';
 
 sub dbic { '[% model_name %]' }
 
-[% FOREACH property = model.properties.keys; %]
-has '[% property %]' => ( is => 'rw', isa => [% attr_type(model.properties.$property) %][% ", traits => ['DBIC']" UNLESS model.properties.$property.item('x-dbic-ignore');
-IF model.properties.$property.format == 'uuid';
-    ', lazy => 1, default => sub { uuid() }';
-END;
-%] );
+[% FOREACH property = model.properties.keys; p = model.properties.$property %]
+has '[% property %]' => (
+    is => 'rw',
+    isa => [% attr_type(p) %],[%
+
+    "\n    traits => ['DBIC']," UNLESS p.item('x-dbic-ignore');
+
+    IF p.format == 'uuid';
+        "\n    lazy => 1,\n    default => sub { uuid() },";
+    ELSIF p.type == 'array';
+        "\n    default => sub { [] },";
+    END;
+
+    IF p.item('x-dbic-rel');
+        "\n    rel => '" _ p.item('x-dbic-rel') _ "',";
+        "\n    mm_rel => '" _ p.item('x-dbic-bridge-name') _ "'," IF p.item('x-dbic-rel') == 'many_to_many';
+    END;
+
+    "\n    primary_key => 1," IF model.item('x-dbic-key') == property;
+
+
+ %]
+);
 [% END %]
 
 1;

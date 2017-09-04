@@ -32,7 +32,11 @@
 
     <div class="routes template">
         <h2>{{ $t( "routes.title" ) }}</h2>
-        <button v-on:click="add_route" v-bind:title="$t('routes.add_title')"type="button">+</button>
+        <button v-on:click="add" v-bind:title="$t('routes.add_title')"type="button">+</button>
+    </div>
+    <div class="edit_route template">
+    <input type="text" v-model="model.name" v-bind:placeholder="$t('route.name')">
+    <button v-on:click="saveData" type="btn" >{{ $t("route.create") }}</button>
     </div>
     <div class="vehicles template">
         <h2>{{ $t( "vehicles.title" ) }}</h2>

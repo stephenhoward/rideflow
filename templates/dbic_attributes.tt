@@ -63,7 +63,7 @@ FOREACH property = model.properties.keys;
     __PACKAGE__->has_many (
         '[% p.item('x-dbic-bridge-name') %]',
         'RideFlow::DB::Result::[% p.item('x-dbic-bridge').replace('#/definitions/','') %]',
-        '[% p.item('x-dbic-me') %]'
+        '[% p.item('x-dbic-key') %]'
     );
 [%
     ELSE

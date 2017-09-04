@@ -1,8 +1,8 @@
 /* include util.js */
 /* include model.js */
 /* include models.js */
-/* include routes.js */
 /* include vehicles.js */
+/* include routes.js */
 
 $(function(){
 
@@ -12,6 +12,7 @@ $(function(){
 
     const routes = [
       { path: '/routes', component: rfRoutes },
+      { path: '/routes/new', component: rfEditRoute },
       { path: '/vehicles', component: rfVehicles },
       { path: '/vehicles/new', component: rfEditVehicle },
       { path: '/vehicles/:id', component: rfVehicle, props: true },
@@ -26,6 +27,11 @@ $(function(){
                 nav: 'Routes',
                 title: 'Routes',
                 add_title: 'Add Route'
+            },
+            route: {
+                name: 'route name',
+                create: 'add route',
+                update: 'save changes'
             },
             vehicles: {
                 nav: 'Vehicles',

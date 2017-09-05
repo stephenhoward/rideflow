@@ -18,6 +18,13 @@ sub save {
     return $self;
 }
 
+sub update {
+    my ( $self, $hashref ) = @_;
+
+    $self->db_update($hashref);
+
+    return $self;
+}
 sub dump {
     my ( $self ) = @_;
 

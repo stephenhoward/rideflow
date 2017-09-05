@@ -306,7 +306,7 @@ apis:
                     x-mojo-to: 'vehicle#fetch'
                     responses:
                         '200':
-                            description: The vehicle identified by vehicle_id
+                            description: The vehicle identified by the uuid
                             schema:
                                 $ref: '#/definitions/Vehicle'
             /routes:
@@ -322,9 +322,20 @@ apis:
                                 type: array
                                 items:
                                     $ref: '#/definitions/Route'
+            '/routes/{uuid}':
+                get:
+                    tags:
+                        - routes
+                    description: Returns a route in the system
+                    x-mojo-to: 'route#fetch'
+                    responses:
+                        '200':
+                            description: The route identified by the uuid
+                            schema:
+                                $ref: '#/definitions/Route'
                 post:
                     description: create a new route
-                    x-mojo-to: 'route#create'
+                    x-mojo-to: 'route#update'
                     responses:
                         '200':
                             description: newly created route

@@ -27,10 +27,14 @@ sub create {
 sub fetch {
     my ( $self, $id ) = @_;
 
-    my $result = $self->model->_schema->resultset( $self->model->dbic )
-        ->new_result({ id => $id })->get_from_storage;
+    if ( my $result = $self->model->_schema->resultset( $self->model->dbic )
+        ->new_result({ id => $id })->get_from_storage ) {
 
-    return $self->model->_new_from_db($result);
+        return $self->model->_new_from_db($result);
+    }
+
+    return undef;
+
 }
 
 sub list {

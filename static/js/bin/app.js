@@ -13,6 +13,7 @@ $(function(){
     const routes = [
       { path: '/routes', component: rfRoutes },
       { path: '/routes/new', component: rfEditRoute },
+      { path: '/routes/:id/edit', component: rfEditRoute, props: true },
       { path: '/vehicles', component: rfVehicles },
       { path: '/vehicles/new', component: rfEditVehicle },
       { path: '/vehicles/:id', component: rfVehicle, props: true },

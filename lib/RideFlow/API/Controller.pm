@@ -20,7 +20,33 @@ sub create {
 sub fetch {
     my $c = $_[0]->openapi->valid_input or return;
 
-    $c->render( openapi => $c->models( $c->model )->fetch( $c->param('uuid') )->dump );
+    if ( my $model = $c->models( $c->model )->fetch( $c->param('uuid') ) ) {
+
+        return $c->render( openapi => $model->dump );
+    }
+
+    return $c->not_found;
+
+}
+
+sub update {
+    my $c = $_[0]->openapi->valid_input or return;
+
+    if ( my $model = $c->models( $c->model )->fetch( $c->param('uuid') ) ) {
+
+        $model->update($c->req->json)->save;
+
+        return $c->render( openapi => $model->dump );
+    }
+
+    return $c->not_found;
+
+}
+
+sub not_found {
+    my ( $c ) = @_;
+
+    return $c->render( openapi => { errors => [] }, status => 404 );
 }
 
 1;

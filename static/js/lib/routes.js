@@ -12,6 +12,14 @@ $(function() {
         }
     };
 
+    Vue.component('route-summary',{
+        template: ht('li.route-summary'),
+        props: ['model'],
+        data: function() {
+            return {};
+        }
+    });
+
     window.rfEditRoute = {
         template: ht('div.edit_route'),
         mixins: [ EditVueMixin ],

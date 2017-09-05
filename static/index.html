@@ -33,6 +33,9 @@
     <div class="routes template">
         <h2>{{ $t( "routes.title" ) }}</h2>
         <button v-on:click="add" v-bind:title="$t('routes.add_title')"type="button">+</button>
+        <ul>
+            <route-summary v-for="model in models" :key="model.id" :model="model"></route-summary>
+        </ul>    
     </div>
     <div class="edit_route template">
     <input type="text" v-model="model.name" v-bind:placeholder="$t('route.name')">
@@ -54,6 +57,9 @@
 
     <li class="vehicle-summary template">
         <router-link :to="'/vehicles/' + model.id + '/edit'">{{ model.name }}</router-link>
+    </li>
+    <li class="route-summary template">
+        <router-link :to="'/routes/' + model.id + '/edit'">{{ model.name }}</router-link>
     </li>
 
     <div class="edit_vehicle template">

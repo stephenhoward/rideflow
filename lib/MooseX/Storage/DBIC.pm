@@ -40,6 +40,13 @@ sub db_save {
     return $self;
 }
 
+sub db_update {
+    my ( $self, $hashref ) = @_;
+
+    # TODO: implement db update
+    return;
+}
+
 sub _dbic_attrs {
     my ( $self ) = @_;
 

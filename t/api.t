@@ -64,7 +64,9 @@ sub test_rest_endpoint {
             else {
                 ok( defined $params->{responses}{200}, 'normal response is defined for '.$url );
 
-                ok( $response->code == '200','Response Success');
+                if ( ! ok( $response->code == '200','Response Success') ) {
+                    diag( "response code was ".$response->code );
+                }
                 my $content_type = $response->headers->content_type;
                 ok(
                  ( any { $content_type eq $_ } @{$params->{produces} || []} ),

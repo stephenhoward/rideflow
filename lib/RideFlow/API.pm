@@ -2,6 +2,7 @@ package RideFlow::API;
 
 use Mojo::Base 'Mojolicious';
 use RideFlow::Model;
+use RideFlow::API::Controller::Authorize;
 
 sub startup {
     my ( $app, $api ) = @_;
@@ -23,7 +24,10 @@ sub startup {
     $app->config( hypnotoad => $app->config->{ht}{$rideflow_app} );
 
     $app->plugin( OpenAPI => {
-        url  => $app->home->rel_file( 'var/config/' . $rideflow_app . '.swagger.yaml')
+        url      => $app->home->rel_file( 'var/config/' . $rideflow_app . '.swagger.yaml'),
+        security => {
+            Bearer => sub { RideFlow::API::Controller::Authorize::check_token(@_) },
+        },
     } );
 
    $app->helper('models' => sub {

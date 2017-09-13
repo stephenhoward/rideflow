@@ -12,6 +12,10 @@ requires 'MooseX::NonMoose', '0.26';
 requires 'DBIx::Class';
 requires 'DBD::Pg', '3.6.2';
 requires 'UUID', '0.27';
+requires 'Mojo::JWT', '0.05';
+requires 'Digest::Bcrypt';
+requires 'Data::Entropy::Algorithms';
+requires 'DateTime';
 
 #required for Javascript::Compile
 requires "Path::Tiny", '0.104';

@@ -23,6 +23,7 @@ my $openapi_to_pg_types = {
         'date'      => 'datetime',
         'date-time' => 'datetime',
         'default'   => 'text',
+        'binary'    => 'bytea',
     },
     'number'  => 'numeric',
     'integer' => 'int',
@@ -37,12 +38,13 @@ my %processed_models;
 foreach my $name ( keys %$models ) {
     process_model( $name );
 
-    model_output( $name, $models->{$name} ) if $models->{$name}{type} eq 'object';
+    model_output( $name, $models->{$name} ) if $models->{$name}{type} eq 'object' && ! ( $models->{$name}{'x-scope'} || '' ) ne 'dbic';
     db_output( $name, $models->{$name} ) if $models->{$name}{'x-dbic-table'};
 
 }
 my $schema = build_schema( $models );
 sql_output( $schema );
+remove_internal($models->{$_} ) foreach keys %$models;
 remove_keys($models->{$_}, qr/^x-(?:dbic|rideflow)-/ ) foreach keys %$models;
 
 while ( my ( $name, $api) = each %{$apis->{apis}} ) {
@@ -189,6 +191,24 @@ sub remove_keys {
         }
         foreach my $key ( grep { ref $ref->{$_} } keys %$ref ) {
             remove_keys( $ref->{$key}, $rx );
+        }
+    }
+}
+
+sub remove_internal {
+    my ( $ref ) = @_;
+
+    if ( ref $ref eq 'ARRAY' ) {
+        remove_internal( $_ ) foreach ( grep { ref } @$ref );
+    }
+    elsif( ref $ref eq 'HASH' ) {
+        foreach my $key ( grep { ref $ref->{$_} } keys %$ref ) {
+            if ( ref $ref->{$key} eq 'HASH' && $ref->{$key}{'x-scope'} ) {
+                delete $ref->{$key};
+            }
+            else {
+                remove_internal( $ref->{$key} );
+            }
         }
     }
 }

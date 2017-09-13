@@ -4,6 +4,8 @@ info:
 responses:
     NotImplemented:
         description: Endpoint not yet implemented
+    NotAuthorized:
+        description: 'You do not have necessary permissions for the resource'
 apis:
     defaults:
         schemes:
@@ -12,6 +14,11 @@ apis:
             - application/json
         produces:
             - application/json;charset=UTF-8
+        securityDefinitions:
+          Bearer:
+            type: apiKey
+            name: Authorization
+            in: header
     public:
         info:
             title: public transit api
@@ -274,7 +281,33 @@ apis:
             title: manager transit api
             version: "1.0"
         basePath: /v1
+        security:
+            - Bearer: []
         paths:
+            /auth/login:
+                post:
+                    security: []
+                    tags:
+                        - authorization
+                    description: submit user credentials to receive a JSON web token
+                    x-mojo-to: 'authorize#get_token'
+                    responses:
+                        '200':
+                            description: A JWT
+                            schema:
+                                type: string
+            /auth/refresh:
+                get:
+                    tags:
+                        - authorization
+                    description: submit about-to-expire JSON web token to receive a replacement
+                    x-mojo-to: 'authorize#refresh_token'
+                    responses:
+                        '200':
+                            description: A JWT
+                            schema:
+                                type: string
+
             /vehicles:
                 get:
                     tags:

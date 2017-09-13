@@ -25,16 +25,31 @@ sub create {
 }
 
 sub fetch {
-    my ( $self, $id ) = @_;
+    my $self = shift;
+    my %params;
+
+    return undef unless @_;
+
+    if ( @_ == 1 ) {
+
+        my ( $id ) = @_;
+
+        $params{id} = $id;
+    }
+    else {
+
+        my ( $key, $value ) = @_;
+
+        $params{$key} = $value;
+    }
 
     if ( my $result = $self->model->_schema->resultset( $self->model->dbic )
-        ->new_result({ id => $id })->get_from_storage ) {
+        ->new_result(\%params)->get_from_storage ) {
 
         return $self->model->_new_from_db($result);
     }
 
     return undef;
-
 }
 
 sub list {

@@ -19,10 +19,10 @@ sub startup {
     }
 
     $app->plugin( YamlConfig => {
-        file => $app->home->rel_file('config/'.$app->mode.'.config.yaml'), class => 'YAML::XS'
+        file => $app->home->rel_file('var/config/'.$app->mode.'.config.yaml'), class => 'YAML::XS'
     } );
     $app->config( hypnotoad => $app->config->{ht}{$rideflow_app} );
-
+    $app->secrets( [ $app->config->{secret} ] );
     $app->plugin( OpenAPI => {
         url      => $app->home->rel_file( 'var/config/' . $rideflow_app . '.swagger.yaml'),
         security => {

@@ -9,10 +9,10 @@ use YAML::XS qw( LoadFile DumpFile );
 use JSON::Validator::OpenAPI;
 use Hash::Merge::Simple 'clone_merge';
 use Template;
+use Data::Entropy::Algorithms 'rand_bits';
 
 my $models  = LoadFile('config/models.yaml');
 my $apis    = LoadFile('config/apis.yaml');
-my $config  = LoadFile('config/development.config.yaml');
 my %dbix_classes;
 my $model_link = qr{#/definitions/([^\/]+)$};
 
@@ -34,6 +34,16 @@ my $tt = Template->new({
     INTERPOLATE  => 0,
 }) or die "$Template::ERROR\n";
 my %processed_models;
+
+my $secret;
+$secret .= sprintf("%x",ord(Data::Entropy::Algorithms::rand_bits(8))) for 1..16;
+$tt->process('config.yaml.tt', {
+    secret => $secret,
+    }, 'var/config/development.config.yaml')
+        or die $tt->error();
+
+my $config  = LoadFile('var/config/development.config.yaml');
+
 
 foreach my $name ( keys %$models ) {
     process_model( $name );

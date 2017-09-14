@@ -9,37 +9,12 @@
   become: true
   become_user: root
   roles:
+    - app
+    - developer
     - ansible-postgresql
     - perl
     - nginx
     - www
-  tasks:
-    - file:
-        path: /rideflow/var/config
-        state: directory
-        mode: 0755
-    - group: 
-        name: rideflow
-        gid: 300
-    - group:
-        name: dev
-    - user:
-        name: rideflow
-        group: rideflow
-        uid: 300
-        comment: "RideFlow app user"
-    - user:
-        name: dev
-        group: rideflow
-        shell: /bin/bash
-        comment: "RideFlow developer"
-    - name: link app directory into user directory
-      file:
-        src: /rideflow
-        dest: /home/dev/rideflow
-        state: link
-        owner: dev
-        group: dev
 - hosts: all
   become: true
   become_user: postgres

@@ -2,6 +2,7 @@ package RideFlow::Model;
 
 use Moose;
 
+use RideFlow::Model::User;
 use RideFlow::Model::Route;
 use RideFlow::Model::Vehicle;
 

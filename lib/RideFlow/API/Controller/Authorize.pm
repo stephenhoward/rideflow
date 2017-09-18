@@ -19,7 +19,7 @@ sub get_token {
         }
     }
 
-    return $c->render( openapi => { errors => [] }, status => 400 );
+    return $c->render_status( 400 => 'Unknown user or password' );
 
 }
 
@@ -34,10 +34,19 @@ sub refresh_token {
         }
     }
 
-    return $c->render( openapi => { errors => [] }, status => 400 );
+    return $c->render_status( 400 => 'Invalid token, cannot refresh' );
 }
 
 # Utils:
+
+sub render_status {
+    my( $c, $code, $message ) = @_;
+    return $c->render( openapi => { errors => [ {
+        message => $message,
+        path    => $c->req->url->to_string,
+
+    } ] }, status => $code );
+}
 
 sub check_token {
     my ( $c, $definition, $scopes, $callback) = @_;

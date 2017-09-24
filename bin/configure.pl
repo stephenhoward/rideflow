@@ -23,7 +23,6 @@ my $openapi_to_pg_types = {
         'date'      => 'datetime',
         'date-time' => 'datetime',
         'default'   => 'text',
-        'binary'    => 'bytea',
     },
     'number'  => 'numeric',
     'integer' => 'int',
@@ -136,6 +135,7 @@ sub build_schema {
 
                     $schema{$table}{columns}{$property}{data_type} = pg_attr_type( $property, $p ) || '';
                     $schema{$table}{columns}{$property}{not_null}  = 1 if $property eq $m->{'x-dbic-key'};
+                    $schema{$table}{columns}{$property}{unique}    = 1 if $p->{'x-unique'};
                 }
             }
 

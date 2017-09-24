@@ -5,6 +5,7 @@ CREATE TABLE [% table.key %] (
         column.key; ' ';
         column.value.data_type == 'datetime' ? 'timestamp with time zone' : column.value.data_type;
         ' NOT NULL' IF column.value.not_null;
+        ' UNIQUE' IF column.value.item('unique');
         ',' IF ! loop.last || table.value.primary_key %]
     [% END %]
     [%- IF table.value.primary_key %]

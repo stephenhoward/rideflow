@@ -44,8 +44,8 @@ sub fetch {
         $params{$key} = $value;
     }
 
-    if ( my $result = $self->model->_schema->resultset( $self->model->dbic )
-        ->new_result(\%params)->get_from_storage ) {
+    if ( my $result = ($self->model->_schema->resultset( $self->model->dbic )
+        ->search(\%params))[0] ) {
 
         return $self->model->_new_from_db($result);
     }

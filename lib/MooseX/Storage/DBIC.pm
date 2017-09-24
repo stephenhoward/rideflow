@@ -80,6 +80,8 @@ sub _dbic_relationships {
 sub _new_from_db {
     my ( $class, $db_result ) = @_;
 
+    return undef unless $db_result;
+
     my $model = $class->new( _dbic_result => $db_result );
 
     foreach my $attr ( grep { defined $db_result->$_ } @{$model->_dbic_attrs} ) {

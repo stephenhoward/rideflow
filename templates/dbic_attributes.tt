@@ -9,10 +9,15 @@ extends 'RideFlow::DB::Result';
 __PACKAGE__->table('[% model.item('x-dbic-table') %]');
 __PACKAGE__->add_columns(
 [%
+uniques = [];
 FOREACH property = model.properties.keys;
     p = model.properties.$property;
 
     NEXT IF p.item('x-dbic-ignore');
+
+    IF p.item('x-unique');
+        uniques.push(property);
+    END;
 
     IF p.item('x-dbic-rel');
         IF p.item('x-dbic-rel') == 'belongs_to';
@@ -30,7 +35,7 @@ FOREACH property = model.properties.keys;
         [% IF model.properties.$property.enum -%]
         extras => [ '[% model.properties.$property.enum.join("','") %]' ],
         [% END -%]
-        [% IF property == model.item('x-dbic-key') %]
+        [%- IF property == model.item('x-dbic-key') || p.item('x-unique') %]
         is_nullable => 0,
         [% END %]
     },
@@ -40,9 +45,18 @@ END
 -%]
 );
 
-[% IF model.item('x-dbic-key') %]
+[%
+IF model.item('x-dbic-key') %]
 __PACKAGE__->set_primary_key('[% model.item('x-dbic-key').join("','") %]');
-[% END %]
+[%
+END;
+
+FOREACH unique IN uniques;
+%]
+__PACKAGE__->add_unique_constraint( [% unique %] => ['[% unique %]'] );
+[%
+END;
+-%]
 
 # Relationships
 [%

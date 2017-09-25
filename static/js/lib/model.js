@@ -56,22 +56,34 @@ class Model {
             return defer.resolve( model_cache[url] );
         }
 
-        $.getJSON(url).done( (json) => {
-            model_cache[url] = new this(json);
-            defer.resolve( model_cache[url] );
-        });
+        $.getJSON(url)
+            .done( (json) => {
+                model_cache[url] = new this(json);
+                defer.resolve( model_cache[url] );
+            })
+            .fail((xhr) => {
+                if ( xhr.status == 401 ) {
+                    console.log('need to log in');
+                }
+            });
 
         return defer.promise();
     }
 
     static list(url) {
         var defer = $.Deferred();
-        $.getJSON(url).done( (json) => {
+        $.getJSON(url)
+            .done( (json) => {
 
-            defer.resolve( json.map( (item) => {
-                return new this(item);
-            }) );
-        });
+                defer.resolve( json.map( (item) => {
+                    return new this(item);
+                }) );
+            })
+            .fail((xhr) => {
+                if ( xhr.status == 401 ) {
+                    console.log('need to log in');
+                }
+            });
 
         return defer.promise();
     }

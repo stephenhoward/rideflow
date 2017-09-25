@@ -26,14 +26,12 @@ $(function() {
             },
             fetchData: function() {
                 let defer = $.Deferred();
+                let type  = this.type();
 
-                $.getJSON( '/v1' + this.url() ).done( (json) => {
-
-                    let type = this.type();
-                    this.models = json.map( (item) => {
-                        return new type(item);
-                    });
+                type.list( '/v1' + this.url() ).done( (items) => {
+                    this.models = items;
                 });
+
                 return defer.promise();
             }
         }

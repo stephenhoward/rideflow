@@ -52,6 +52,7 @@ sub check_token {
     my ( $c, $definition, $scopes, $callback) = @_;
 
     if ( my $jwt = $c->req->headers->authorization ) {
+        $jwt =~ s/^Bearer\s+//;
 
         my $claims = eval {
             Mojo::JWT->new( secret => $c->app->secrets->[0] )->decode($jwt);

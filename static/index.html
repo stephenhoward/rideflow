@@ -64,6 +64,14 @@
 
     <div class="edit_vehicle template">
     <input type="text" v-model="model.name" v-bind:placeholder="$t('vehicle.name')">
-    <button v-on:click="saveData" type="btn" >{{ $t("vehicle.create") }}</button>
+    <button v-on:click="saveData" type="button" >{{ $t("vehicle.create") }}</button>
     </div>
+
+    <div class="login template">
+        <div>{{ error }}</div>
+        <input type="email"    v-bind:placeholder="$t('login.email')"    v-model="email">
+        <input type="password" v-bind:placeholder="$t('login.password')" v-model="password">
+        <button v-on:click="doLogin" type="button">
+    </div>
+
 </html>

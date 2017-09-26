@@ -60,11 +60,6 @@ class Model {
             .done( (json) => {
                 model_cache[url] = new this(json);
                 defer.resolve( model_cache[url] );
-            })
-            .fail((xhr) => {
-                if ( xhr.status == 401 ) {
-                    console.log('need to log in');
-                }
             });
 
         return defer.promise();
@@ -78,11 +73,6 @@ class Model {
                 defer.resolve( json.map( (item) => {
                     return new this(item);
                 }) );
-            })
-            .fail((xhr) => {
-                if ( xhr.status == 401 ) {
-                    console.log('need to log in');
-                }
             });
 
         return defer.promise();

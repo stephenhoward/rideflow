@@ -2,7 +2,7 @@
 
 $(function() {
 
-var jwt = null
+let refresh_timer = null;
 
 window.LoginVue = {
     template : ht('div.login'),
@@ -17,18 +17,17 @@ window.LoginVue = {
     },
     methods : {
         doLogin: function() {
-            console.log(this);
-            console.log(this.email);
-            console.log(this.password);
             login(this.email,this.password)
                 .done(() => {
-                    console.log(jwt);
+
                 })
                 .fail((error) => {
                     this.error = error;
                 });
+        },
+        doLogout: function() {
+            logout();
         }
-
     }
 }
 
@@ -45,35 +44,63 @@ function login (email,password) {
             password : password
         })
     }).done( (data) => {
-        jwt = data;
+        set_token(data);
 
     }).fail( (xhr) => {
         var json = JSON.parse(xhr.responseText);
-        console.log(json);
-        jwt      = null;
-
+        unset_token();
     });
 
     return defer.promise();
 }
 
-function refresh_login() {
+function refresh_login(timeout) {
+    let timer = timeout - Math.floor(Date.now() / 1000) - 20;
 
-    $.ajax({
-        url  : '/v1/auth/token',
-        type : 'GET',
-    }).done( (data) => {
-        jwt = data;
+    if ( timer > 0 ) {
 
-    }).fail( (xhr) => {
-        var json = JSON.parse(data);
-        jwt      = null;
+        refresh_timer = setTimeout( () => {
+            $.ajax({
+                url  : '/v1/auth/token',
+                type : 'GET',
+            }).done( (data) => {
+                set_token(data);
+            }).fail( (xhr) => {
+                var json = JSON.parse(data);
+                unset_token();
+            });
+        }, timer * 1000 );
+    }
+    else {
+        unset_token();
+    }
+}
 
-    });
+function logout() {
+    unset_token();
+}
+
+function set_token(data) {
+    sessionStorage.setItem('jwt',data);
+
+    let jw_token = JSON.parse(
+        atob( data.split('.')[1].replace('-','+').replace('_','/') )
+    );
+    sessionStorage.setItem('jw_token', JSON.stringify(jw_token) );
+    refresh_login( jw_token.exp );
+
+}
+function unset_token() {
+        sessionStorage.removeItem('jwt');
+        sessionStorage.removeItem('jw_token');
+        if ( refresh_timer ) {
+            clearTimeout(refresh_timer);
+        }
 }
 
 $.ajaxSetup({
     beforeSend: (xhr) => {
+        let jwt = sessionStorage.getItem('jwt');
         if ( jwt ) {
             xhr.setRequestHeader( 'Authorization', 'Bearer ' + jwt );
         }
@@ -86,5 +113,9 @@ $.ajaxSetup({
         }
     }
 });
+
+if ( sessionStorage.getItem('jwt') ) {
+    set_token( sessionStorage.getItem('jwt') );
+}
 
 });

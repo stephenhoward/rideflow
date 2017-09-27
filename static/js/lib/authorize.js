@@ -37,7 +37,7 @@ function login (email,password) {
     var defer = $.Deferred();
 
     $.ajax({
-        url         : '/v1/auth/login',
+        url         : '/v1/auth/token',
         type        : 'POST',
         contentType : 'application/json; charset=utf-8',
         data: JSON.stringify({
@@ -60,7 +60,7 @@ function login (email,password) {
 function refresh_login() {
 
     $.ajax({
-        url  : '/v1/auth/refresh',
+        url  : '/v1/auth/token',
         type : 'GET',
     }).done( (data) => {
         jwt = data;
@@ -79,8 +79,9 @@ $.ajaxSetup({
         }
     },
     statusCode: {
-        401: (xhr) => {
+        401: (xhr,err,error_text) => {
             console.log('need to log in');
+            console.log(error_text);
             window.app.$router.push({ path: '/login', query: { error: xhr.status } });
         }
     }

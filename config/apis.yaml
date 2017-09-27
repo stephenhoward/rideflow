@@ -284,8 +284,22 @@ apis:
         security:
             - Bearer: []
         paths:
-            /auth/login:
+            /auth/token:
                 post:
+                    parameters:
+                        - name: credentials
+                          in: body
+                          required: true
+                          schema:
+                            type: object
+                            required: [ 'email','password' ]
+                            properties:
+                                email:
+                                    type: string
+                                    format: email
+                                passord:
+                                    type: string
+                                    format: password
                     security: []
                     tags:
                         - authorization
@@ -296,7 +310,8 @@ apis:
                             description: A JWT
                             schema:
                                 type: string
-            /auth/refresh:
+                        '401':
+                            description: Failed login
                 get:
                     tags:
                         - authorization
@@ -307,6 +322,8 @@ apis:
                             description: A JWT
                             schema:
                                 type: string
+                        '401':
+                            description: Cannot refresh with provided token
 
             /vehicles:
                 get:

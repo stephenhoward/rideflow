@@ -19,7 +19,7 @@ sub get_token {
         }
     }
 
-    return $c->render_status( 400 => 'Unknown user or password' );
+    return $c->render_status( 401 => 'Unknown user or password' );
 
 }
 
@@ -34,7 +34,7 @@ sub refresh_token {
         }
     }
 
-    return $c->render_status( 400 => 'Invalid token, cannot refresh' );
+    return $c->render_status( 401 => 'Invalid token, cannot refresh' );
 }
 
 # Utils:

@@ -12,7 +12,7 @@ $(function(){
     const Rides    = { template: ht('div.rides') };
 
     const routes = [
-      { path: '/login', component: LoginVue, props: true },
+      { path: '/login', component: LoginVue, name: 'login', props: true },
       { path: '/routes', component: rfRoutes },
       { path: '/routes/new', component: rfEditRoute },
       { path: '/routes/:id/edit', component: rfEditRoute, props: true },

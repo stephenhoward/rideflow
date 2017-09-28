@@ -19,6 +19,7 @@ window.LoginVue = {
         doLogin: function() {
             login(this.email,this.password)
                 .done(() => {
+                    this.error = '';
 
                 })
                 .fail((error) => {
@@ -45,10 +46,12 @@ function login (email,password) {
         })
     }).done( (data) => {
         set_token(data);
+        defer.resolve(data);
 
     }).fail( (xhr) => {
         var json = JSON.parse(xhr.responseText);
         unset_token();
+        defer.reject( xhr.status );
     });
 
     return defer.promise();
@@ -109,7 +112,7 @@ $.ajaxSetup({
         401: (xhr,err,error_text) => {
             console.log('need to log in');
             console.log(error_text);
-            window.app.$router.push({ path: '/login', query: { error: xhr.status } });
+            window.app.$router.push({ name: 'login', params: { error: xhr.status } });
         }
     }
 });

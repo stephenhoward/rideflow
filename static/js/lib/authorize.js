@@ -119,3 +119,15 @@ if ( sessionStorage.getItem('jwt') ) {
 }
 
 });
+
+function has_token() {
+    let token =  sessionStorage.getItem('jw_token');
+
+    if ( token ) {
+        token = JSON.parse(token);
+        if ( token.exp > Math.floor(Date.now() / 1000) ) {
+            return true;
+        }
+    }
+    return false;
+}

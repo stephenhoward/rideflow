@@ -74,5 +74,9 @@ $(function(){
       i18n   : i18n
     }).$mount('#rfapp');
 
+    if ( ! has_token() && window.app.$router.currentRoute && window.app.$router.currentRoute.path != '/login' ) {
+        window.app.$router.push('/login');
+    }
+
 });
 

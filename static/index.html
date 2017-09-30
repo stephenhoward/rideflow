@@ -6,6 +6,17 @@
     </head>
     <body>
         <div id="rfapp">
+            <router-view></router-view>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+        <script src="https://unpkg.com/vue"></script>
+        <script src="https://unpkg.com/vue-i18n/dist/vue-i18n.js"></script>
+        <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+        <script src="/static/js/app.js"></script>
+    </body>
+
+    <div class="root template">
         <header>
             <nav>
                 <li><router-link to="/routes">{{   $t( "routes.nav"   ) }}</router-link></li>
@@ -21,14 +32,7 @@
         </main>
         <footer>
         </footer>
-        </div>
-    </body>
-
-    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-    <script src="https://unpkg.com/vue"></script>
-    <script src="https://unpkg.com/vue-i18n/dist/vue-i18n.js"></script>
-    <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
-    <script src="/static/js/app.js"></script>
+    </div>
 
     <div class="routes template">
         <h2>{{ $t( "routes.title" ) }}</h2>
@@ -37,10 +41,12 @@
             <route-summary v-for="model in models" :key="model.id" :model="model"></route-summary>
         </ul>    
     </div>
+
     <div class="edit_route template">
-    <input type="text" v-model="model.name" v-bind:placeholder="$t('route.name')">
-    <button v-on:click="saveData" type="btn" >{{ $t("route.create") }}</button>
+        <input type="text" v-model="model.name" v-bind:placeholder="$t('route.name')">
+        <button v-on:click="saveData" type="btn" >{{ $t("route.create") }}</button>
     </div>
+
     <div class="vehicles template">
         <h2>{{ $t( "vehicles.title" ) }}</h2>
         <button v-on:click="add" v-bind:title="$t('vehicles.add_title')"type="button">+</button>
@@ -48,6 +54,7 @@
             <vehicle-summary v-for="model in models" :key="model.id" :model="model"></vehicle-summary>
         </ul>    
     </div>
+
     <div class="drivers template">Drivers</div>
     <div class="rides template">Rides</div>
 
@@ -68,10 +75,20 @@
     </div>
 
     <div class="login template">
+        <h3>{{ $t('login.title') }}</h3>
         <div>{{ error }}</div>
         <input type="email"    v-bind:placeholder="$t('login.email')"    v-model="email">
         <input type="password" v-bind:placeholder="$t('login.password')" v-model="password">
-        <button v-on:click="doLogin" type="button">
+        <button v-on:click="doLogin" type="button">{{ $t("login.login") }}</button>
+        <router-link :to="{ name: 'forgot_password', params: { em: this.email }}" >{{ $t("login.forgot_password") }}</a>
+    </div>
+
+    <div class="forgot_password template">
+        <h3>{{ $t('forgot_password.title') }}</h3>
+        <p>{{ $t('forgot_password.instructions') }}</p>
+        <input type="email" v-bind:placeholder="$t('forgot_password.email')" v-model="email">
+        <button v-on:click="doReset" type="button">{{ $t('forgot_password.go_button') }}</button>
+        <router-link :to="{ name: 'login', params: { em: this.email }}" >{{ $t("forgot_password.login_link") }}</a>
     </div>
 
 </html>

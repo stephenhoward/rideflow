@@ -6,7 +6,7 @@ let refresh_timer = null;
 
 window.LoginVue = {
     template : ht('div.login'),
-    props    : ['error'],
+    props    : ['error','em'],
     data     : () => {
 
         return {
@@ -14,6 +14,9 @@ window.LoginVue = {
             password : ''
         };
 
+    },
+    created: function() {
+        this.email = this.em || '';
     },
     methods : {
         doLogin: function() {
@@ -30,7 +33,24 @@ window.LoginVue = {
             logout();
         }
     }
-}
+};
+
+window.PasswordForgotVue = {
+    template : ht('div.forgot_password'),
+    props    : ['em'],
+    data     : () => {
+        return {
+            email: ''
+        };
+    },
+    created: function() {
+        this.email = this.em || '';
+    },
+    methods : {
+        doReset: function() {
+        },
+    }
+};
 
 function login (email,password) {
 

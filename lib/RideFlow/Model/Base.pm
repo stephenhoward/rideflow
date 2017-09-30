@@ -10,6 +10,12 @@ sub _schema {
     $schema ||= RideFlow::DB->db_connect();
 }
 
+sub fetch {
+    my $class = shift;
+
+    RideFlow::Model->m($class)->fetch(@_);
+}
+
 sub save {
     my ( $self ) = @_;
 
@@ -25,6 +31,15 @@ sub update {
 
     return $self;
 }
+
+sub delete {
+    my ( $self ) = @_;
+
+    $self->db_delete();
+
+    return;
+}
+
 sub dump {
     my ( $self ) = @_;
 

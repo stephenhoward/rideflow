@@ -324,7 +324,58 @@ apis:
                                 type: string
                         '401':
                             description: Cannot refresh with provided token
-
+            /auth/reset:
+                post:
+                    description: generate a temporary password reset token, emailed to the proper user
+                    security: []
+                    x-mojo-to: authorize#create_password_reset
+                    parameters:
+                        - name: credentials
+                          in: body
+                          required: true
+                          schema:
+                            type: object
+                            required: [ 'email' ]
+                            properties:
+                                email:
+                                    type: string
+                                    format: email
+                    responses:
+                        '200':
+                            description: token created
+            /auth/reset/{uuid}:
+                get:
+                    description: validate a temporary password reset token
+                    security: []
+                    x-mojo-to: authorize#check_password_reset
+                    responses:
+                        '200':
+                            description: the token is valid
+                        '410':
+                            description: the token has expired
+                        '404':
+                            description: no matching token
+                post:
+                    description: reset password tied to the reset token
+                    security: []
+                    x-mojo-to: authorize#do_password_reset
+                    parameters:
+                        - name: credentials
+                          in: body
+                          required: true
+                          schema:
+                            type: object
+                            required: [ password' ]
+                            properties:
+                                email:
+                                    type: string
+                                    format: email
+                                password:
+                                    type: string
+                                    format: password
+                    responses:
+                        '200':
+                            description: successfully reset password
             /vehicles:
                 get:
                     tags:

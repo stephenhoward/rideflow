@@ -37,6 +37,47 @@ sub refresh_token {
     return $c->render_status( 401 => 'Invalid token, cannot refresh' );
 }
 
+sub create_password_reset {
+    my $c = $_[0]->openapi->valid_input or return;
+
+    return $c->render( openapi => { errors => [] }, status => 400 ) unless $c->req->json && $c->req->json->{email};
+
+    if ( my $user = $c->models('User')->fetch( email => lc $c->req->json->{email} ) ) {
+
+        $c->models('PasswordReset')->model->issue_reset($user)->send;
+
+        return $c->render_status( 200 => 'ok' );
+    }
+}
+
+sub check_password_reset {
+    my $c = $_[0]->openapi->valid_input or return;
+
+    return $c->_if_valid_reset_token( sub {
+        my ( $c, $reset_token ) = @_;
+
+        return $c->render_status( 200 => 'Ok' );
+    } );
+}
+
+sub do_password_reset {
+    my $c = $_[0]->openapi->valid_input or return;
+
+    return $c->render( openapi => { errors => [] }, status => 400 ) unless $c->req->json && $c->req->json->{password};
+
+    return $c->_if_valid_reset_token( sub {
+        my ( $c, $reset_token ) = @_;
+
+        my $user = $reset_token->user;
+
+        $user->set_password($c->req->json->{password});
+
+        $reset_token->delete;
+
+        return $c->render( openapi => $c->_generate_token($user) );
+    } );
+}
+
 # Utils:
 
 sub render_status {
@@ -82,5 +123,22 @@ sub _generate_token {
         secret  => $c->app->secrets->[0],
     )->encode;
 }
+
+sub _if_valid_reset_token {
+    my( $c,$callback ) = @_;
+
+    if ( my $reset_token = $c->models('PasswordReset')->fetch( $c->param('uuid') ) ) {
+
+        if ( $reset_token->expired ) {
+            $reset_token->delete;
+            return $c->render_status( 410 => 'Expired' );
+        }
+        else {
+            return $callback($c,$reset_token);
+        }
+    }
+    return $c->render_status( 404 => 'Not Found' );
+}
+
 
 1;

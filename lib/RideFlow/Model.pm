@@ -5,6 +5,7 @@ use Moose;
 use RideFlow::Model::User;
 use RideFlow::Model::Route;
 use RideFlow::Model::Vehicle;
+use RideFlow::Model::PasswordReset;
 
 has model => (
     is => 'rw',
@@ -15,6 +16,8 @@ has model => (
 sub m {
 
     my ( $class, $name ) = @_;
+
+    $name =~ s/^RideFlow::Model:://;
 
     return $class->new( model => "RideFlow::Model::$name" );
 }

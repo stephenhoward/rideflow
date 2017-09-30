@@ -16,6 +16,8 @@ requires 'Mojo::JWT', '0.05';
 requires 'Digest::Bcrypt';
 requires 'Data::Entropy::Algorithms';
 requires 'DateTime';
+requires 'Email::Simple';
+requires 'Email::Sender::Simple';
 
 #required for Javascript::Compile
 requires "Path::Tiny", '0.104';

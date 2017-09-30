@@ -47,6 +47,16 @@ sub db_update {
     return;
 }
 
+sub db_delete {
+    my ( $self ) = @_;
+
+    if ( $self->_dbic_result ** $self->_dbic_result->in_storage ) {
+        $self->_dbic_result->delete;
+    }
+
+    return;
+}
+
 sub _dbic_attrs {
     my ( $self ) = @_;
 

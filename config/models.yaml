@@ -290,6 +290,21 @@ User:
               salt:
                   type: string
                   x-scope: internal
+PasswordReset:
+    description: a temporary token to allow a user to reset their password
+    x-rideflow-scope: protected
+    x-dbic-table: password_reset
+    allOf:
+        - $ref: '#/definitions/Identifiable'
+        - type: object
+          properties:
+              expires:
+                  type: string
+                  format: date-time
+              user:
+                  x-dbic-rel: belongs_to
+                  x-dbic-key: user_id
+                  $ref: '#/definitions/User'
 Vehicle:
     description: a vehicle plys a route to transport riders
     x-dbic-table: vehicles

@@ -15,16 +15,13 @@ server {
     gzip_types text/css application/json application/javascript;
 
     [% IF server == 'manage' %]
-        root /rideflow/static;
+        root /host-web/public;
         index index.html;
 
         location / {
-            root /rideflow/static;
+            root /host-web/public;
         }
 
-        location /static {
-            root /rideflow/var;
-        }
     [% END %]
 
     location /v1 {

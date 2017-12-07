@@ -25,7 +25,7 @@ sub m {
 sub create {
     my( $self, $params ) = @_;
 
-    return $self->model->new($params)->save;
+    return $self->model->new(%$params)->save;
 }
 
 sub fetch {

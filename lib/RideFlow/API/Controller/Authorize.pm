@@ -46,8 +46,10 @@ sub create_password_reset {
 
         $c->models('PasswordReset')->model->issue_reset($user)->send;
 
-        return $c->render_status( 200 => 'ok' );
+        return $c->render( openapi => 'Ok' );
     }
+
+    return $c->render_status( 404 => 'No such email found');
 }
 
 sub check_password_reset {
@@ -56,7 +58,7 @@ sub check_password_reset {
     return $c->_if_valid_reset_token( sub {
         my ( $c, $reset_token ) = @_;
 
-        return $c->render_status( 200 => 'Ok' );
+        return $c->render( openapi => 'Ok' );
     } );
 }
 

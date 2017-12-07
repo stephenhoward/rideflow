@@ -1,8 +1,8 @@
 requires 'YAML::XS', '0.65';
 requires 'Mojolicious', '7.39';
-requires 'Mojolicious::Plugin::OpenAPI', '1.21';
+requires 'JSON::Validator','1.07';
+requires 'Mojolicious::Plugin::OpenAPI', '1.22';
 requires 'Mojolicious::Plugin::YamlConfig', '0.2.1';
-requires 'JSON::Validator::OpenAPI';
 requires 'Hash::Merge::Simple', '0.051';
 requires 'Template', '2.27';
 requires 'Moose';
@@ -18,7 +18,3 @@ requires 'Data::Entropy::Algorithms';
 requires 'DateTime';
 requires 'Email::Simple';
 requires 'Email::Sender::Simple';
-
-#required for Javascript::Compile
-requires "Path::Tiny", '0.104';
-requires "JavaScript::Minifier::XS", '0.11';

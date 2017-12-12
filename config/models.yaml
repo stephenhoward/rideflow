@@ -16,6 +16,14 @@ payment_class:
         - Credit
         - Promotion
         - Complimentary
+location:
+    description: a latitude/longitude pair
+    type: array
+    format: point
+    minItems: 2
+    maxItems: 2
+    items:
+      type: number
 Identifiable:
     description: role for things with a uuid
     type: object
@@ -32,13 +40,8 @@ Locatable:
         - $ref: '#/definitions/Identifiable'
         - type: object
           properties:
-              latitude:
-                  description: degrees North
-                  type: number
-                  x-rideflow-scope: public
-              longitude:
-                  description: degrees East
-                  type: number
+              location:
+                  $ref: '#/definitions/location'
                   x-rideflow-scope: public
 Vectorable:
     description: role for things with position and direction
@@ -134,6 +137,11 @@ Route:
           properties:
               name:
                   type: string
+              path:
+                  description: a set of ordered coordinates describing the route
+                  type: array
+                  items:
+                    $ref: '#/definitions/location'
               stops:
                   type: array
                   x-dbic-rel: many_to_many

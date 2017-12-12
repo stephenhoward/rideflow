@@ -9,6 +9,7 @@ extends 'DBIx::Class::Core';
 
 __PACKAGE__->load_components(qw(
     InflateColumn::DateTime
+    InflateColumn::PgGeometry
 ));
 
 __PACKAGE__->meta->make_immutable;

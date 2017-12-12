@@ -7,7 +7,9 @@ openapi_to_moose_types = {
 };
 
 MACRO attr_type(property,embedded) BLOCK;
-    IF property.item('$ref');
+    IF property.item('$ref') == '#/definitions/location';
+        embedded ? "ArrayRef[Num]" : "'ArrayRef[Num]'";
+    ELSIF property.item('$ref');
         embedded ? "Object" : "'Maybe[Object]'";
     ELSIF property.type == 'string';
         IF property.enum;
@@ -18,9 +20,11 @@ MACRO attr_type(property,embedded) BLOCK;
             embedded ? "Str" : "'Maybe[Str]'";
         END;
     ELSIF property.type == 'array';
-        "'ArrayRef[";
+        "'" UNLESS embedded;
+        "ArrayRef[";
             attr_type(property.items,1);
-        "]'";
+        "]";
+        "'" UNLESS embedded;
     ELSE;
         "'Maybe[" UNLESS embedded;
         openapi_to_moose_types.${property.type};

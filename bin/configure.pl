@@ -166,6 +166,13 @@ sub pg_attr_type {
 
         return $openapi_to_pg_types->{string}{ $property->{format} || 'default' } || 'text';
     }
+    if ( $property->{type} eq 'array' && ( $property->{items}{'$ref'} || '' ) eq '#/definitions/location' ) {
+
+        return 'path';
+    }
+    if ( $property->{type} eq 'array' && $property->{format} eq 'point' ) {
+        return 'point';
+    }
 
     return $openapi_to_pg_types->{ $property->{type} };
 }

@@ -1,5 +1,12 @@
+let Model = require('./model.js');
 
-[% FOREACH model IN models.pairs %]
+[%
+classes = [];
+
+FOREACH model IN models.pairs;
+    NEXT UNLESS model.value.type == 'object';
+    classes.push(model.key);
+%]
 class [% model.key %] extends Model {
     definition() {
         return {
@@ -33,3 +40,5 @@ class [% model.key %] extends Model {
 
 }
 [% END %]
+
+module.exports = { [% classes.join(', ') %] };

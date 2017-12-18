@@ -410,6 +410,16 @@ apis:
                             description: The vehicle identified by the uuid
                             schema:
                                 $ref: '#/definitions/Vehicle'
+                post:
+                    tags:
+                        - vehicles
+                    description: update a vehicle
+                    x-mojo-to: 'vehicle#update'
+                    responses:
+                        '200':
+                            description: The updated vehicle
+                            schema:
+                                $ref: '#/definitions/Vehicle'
             /routes:
                 get:
                     tags:

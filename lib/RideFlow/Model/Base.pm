@@ -27,7 +27,12 @@ sub save {
 sub update {
     my ( $self, $hashref ) = @_;
 
-    $self->db_update($hashref);
+    foreach my $attr ( map { $_->name } $self->meta->get_all_attributes ) {
+
+        if ( exists $hashref->{$attr} ) {
+            $self->$attr( $hashref->{$attr} );
+        }
+    }
 
     return $self;
 }

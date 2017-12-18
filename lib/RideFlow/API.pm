@@ -35,6 +35,7 @@ sub startup {
 
         RideFlow::Model->m($model);
    });
+
 }
 
 1;

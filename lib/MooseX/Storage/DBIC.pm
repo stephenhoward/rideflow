@@ -40,17 +40,10 @@ sub db_save {
     return $self;
 }
 
-sub db_update {
-    my ( $self, $hashref ) = @_;
-
-    # TODO: implement db update
-    return;
-}
-
 sub db_delete {
     my ( $self ) = @_;
 
-    if ( $self->_dbic_result ** $self->_dbic_result->in_storage ) {
+    if ( $self->_dbic_result && $self->_dbic_result->in_storage ) {
         $self->_dbic_result->delete;
     }
 

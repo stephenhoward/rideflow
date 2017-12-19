@@ -42,7 +42,7 @@ sub delete {
 
     $self->db_delete();
 
-    return;
+    return 1;
 }
 
 sub dump {

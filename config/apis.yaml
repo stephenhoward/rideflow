@@ -420,6 +420,16 @@ apis:
                             description: The updated vehicle
                             schema:
                                 $ref: '#/definitions/Vehicle'
+                delete:
+                    tags:
+                        - vehicles
+                    description: delete or archive a vehicle
+                    x-mojo-to: 'vehicle#delete'
+                    responses:
+                        '200':
+                            description: Success or failure indicator
+                            schema:
+                                type: boolean
             /routes:
                 get:
                     tags:

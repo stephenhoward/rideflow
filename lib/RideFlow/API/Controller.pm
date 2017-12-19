@@ -43,10 +43,32 @@ sub update {
 
 }
 
+sub delete {
+    my $c = $_[0]->openapi->valid_input or return;
+
+    if ( my $model = $c->models( $c->model )->fetch( $c->param('uuid') ) ) {
+
+        if ( $model->delete ) {
+            return $c->render( openapi => 1 );
+        }
+        else {
+            return $c->bad_request;
+        }
+    }
+
+    return $c->not_found;
+}
+
 sub not_found {
     my ( $c ) = @_;
 
     return $c->render( openapi => { errors => [] }, status => 404 );
+}
+
+sub bad_request {
+    my ( $c ) = @_;
+
+    return $c->render( openapi => { errors => []}, status => 400 );
 }
 
 1;

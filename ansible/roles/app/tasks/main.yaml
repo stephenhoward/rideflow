@@ -1,4 +1,8 @@
 ---
+- name: install ntp
+  apt:
+    name: ntp
+    update_cache: yes
 - file:
     path: /rideflow/var/config
     state: directory

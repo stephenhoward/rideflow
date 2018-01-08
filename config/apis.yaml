@@ -457,11 +457,75 @@ apis:
                 post:
                     description: create a new route
                     x-mojo-to: 'route#update'
+                    parameters:
+                    - in: body
+                      name: model
+                      required: true
+                      schema:
+                        $ref: '#/definitions/Route'
                     responses:
                         '200':
                             description: newly created route
                             schema:
                                 $ref: '#/definitions/Route'
+            /stops:
+                get:
+                    tags:
+                        - stops
+                    description: Returns a list of all stops in the system
+                    x-mojo-to: 'stop#list'
+                    responses:
+                        '501':
+                            $ref: '#/responses/NotImplemented'
+                        '200':
+                            description: A list of stops
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/definitions/Stop'
+                post:
+                    tags:
+                        - stops
+                    description: Create a new Stop
+                    x-mojo-to: 'stop#create'
+                    parameters:
+                    - in: body
+                      name: model
+                      required: true
+                      schema:
+                        $ref: '#/definitions/Stop'
+                    responses:
+                        '200':
+                            description: The newly created stop
+                            schema:
+                                $ref: '#/definitions/Stop'
+            '/stops/{uuid}':
+                post:
+                    tags:
+                        - stops
+                    description: update a stop
+                    x-mojo-to: 'stop#update'
+                    parameters:
+                    - in: body
+                      name: model
+                      required: true
+                      schema:
+                        $ref: '#/definitions/Stop'
+                    responses:
+                        '200':
+                            description: The updated stop
+                            schema:
+                                $ref: '#/definitions/Stop'
+                delete:
+                    tags:
+                        - stops
+                    description: delete or archive a stop
+                    x-mojo-to: 'stop#delete'
+                    responses:
+                        '200':
+                            description: Success or failure indicator
+                            schema:
+                                type: boolean
             /sessions:
                 get:
                     description: List route session history

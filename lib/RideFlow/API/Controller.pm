@@ -12,7 +12,9 @@ sub list {
 sub create {
     my $c = $_[0]->openapi->valid_input or return;
 
-    my $model = $c->models( $c->model )->create($c->req->json);
+    my $model = $c->posted_model();
+
+    $model->save();
 
     $c->render( openapi => $model->dump );
 }
@@ -32,7 +34,7 @@ sub fetch {
 sub update {
     my $c = $_[0]->openapi->valid_input or return;
 
-    if ( my $model = $c->models( $c->model )->fetch( $c->param('uuid') ) ) {
+    if ( my $model = $c->posted_model( $c->param('uuid') ) ) {
 
         $model->update($c->req->json)->save;
 

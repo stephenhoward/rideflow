@@ -30,11 +30,37 @@ sub startup {
         },
     } );
 
-   $app->helper('models' => sub {
+    $app->helper('models' => sub {
         my ( $c, $model ) = @_;
 
         RideFlow::Model->m($model);
-   });
+    });
+
+    $app->helper('posted_model' => sub {
+        my ( $c, $id ) = @_;
+
+        my $spec  = $c->openapi->spec;
+        my $model = undef;
+
+        if ( $spec->{parameters} && $spec->{parameters}[0]{name} eq 'model' ) {
+
+            my $class = ( $spec->{parameters}[0]{schema}{'$ref'} =~ / ( [^\/]+ ) $ /x )[0];
+
+            if ( $id ) {
+                $model = $c->models( $class )->fetch( $c->param('uuid') );
+
+                if ( $model ) {
+                    $model->update($c->req->json);
+                }
+            }
+            else {
+                $model = $c->models( $class )->build($c->req->json);
+            }
+        }
+
+
+        return $model;
+    });
 
 }
 

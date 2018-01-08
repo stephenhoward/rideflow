@@ -31,7 +31,6 @@ Identifiable:
     properties:
       id:
           type:   string
-          readOnly: true
           format: uuid
           x-rideflow-scope: public
 Locatable:

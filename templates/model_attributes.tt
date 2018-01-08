@@ -10,12 +10,13 @@ MACRO attr_type(property,embedded) BLOCK;
     IF property.item('$ref') == '#/definitions/location';
         embedded ? "ArrayRef[Num]" : "'ArrayRef[Num]'";
     ELSIF property.item('$ref');
-        embedded ? "Object" : "'Maybe[Object]'";
+        class = property.item('$ref').replace('((.+?)/)+','');
+        embedded ? 'RideFlow::Model::' _ class : "'Maybe[RideFlow::Model::" _ class _ "]'";
     ELSIF property.type == 'string';
         IF property.enum;
             "enum(['" _ property.enum.join("','") _ "'])";
         ELSIF property.format == 'date' || property.format == 'date-time';
-            embedded ? "Object" : "'Maybe[Object]'";
+            embedded ? "DateTime" : "'Maybe[DateTime]'";
         ELSE;
             embedded ? "Str" : "'Maybe[Str]'";
         END;
@@ -61,6 +62,8 @@ has '[% property %]' => (
     IF p.item('x-dbic-rel');
         "\n    rel => '" _ p.item('x-dbic-rel') _ "',";
         "\n    mm_rel => '" _ p.item('x-dbic-bridge-name') _ "'," IF p.item('x-dbic-rel') == 'many_to_many';
+        "\n    reader => '_get_" _ property _ "',";
+        "\n    writer => '_set_" _ property _ "',";
     END;
 
     "\n    primary_key => 1," IF model.item('x-dbic-key') == property;
@@ -69,5 +72,14 @@ has '[% property %]' => (
  %]
 );
 [% END %]
+[%
+FOREACH property = model.properties.keys;
+    p = model.properties.$property;
+    NEXT UNLESS p.item('x-dbic-rel');
+%]
+sub [% property %] { my $self = shift; return $self->_relationship_accessor('[% property %]',@_); }
+[%
+END;
+%]
 
 1;

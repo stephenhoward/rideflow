@@ -90,7 +90,6 @@ sub _relationship_accessor {
     }
     else {
         my $setter = '_set_' . $property;
-        use Data::Dumper; warn Dumper $self->_transform_relationship_input($property, @_);
         $self->$setter( $self->_transform_relationship_input( $property, @_ ) );
     }
 }
@@ -104,7 +103,7 @@ sub _transform_relationship_input {
 
     return ( $attr->rel =~ /to_many$/ )
         ? [
-            map { $factory->build($_) }
+            map { $factory->build($_, 1 ) }
             ( ref $value eq 'ARRAY'
                 ? @$value
                 : defined $value

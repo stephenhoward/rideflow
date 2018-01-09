@@ -1,6 +1,7 @@
 package RideFlow::Model;
 
 use Moose;
+use Scalar::Util 'blessed';
 
 use RideFlow::Model::User;
 use RideFlow::Model::Route;
@@ -24,7 +25,7 @@ sub m {
 }
 
 sub build {
-    my( $self, $params ) = @_;
+    my( $self, $params, $no_rel ) = @_;
 
     if ( ! ref $params ) {
         die "Cannot build a ". $self->model ." from '$params'";
@@ -36,8 +37,14 @@ sub build {
     elsif( ref $params eq 'ARRAY' ) {
         die "Cannot build a ". $self->model ." from an Array Ref";
     }
-    elsif( $params->isa( $self->model ) ) {
+    elsif( blessed $params && $params->isa( $self->model ) ) {
         return $params;
+    }
+    elsif( blessed $params && $params->isa( 'RideFlow::DB::Result' ) ) {
+
+        my $type = ( ( ref $params ) =~ / ( [^:]+ ) $ /x )[0];
+
+        return RideFlow::Model->m( $type )->model->_new_from_db($params, $no_rel);
     }
     else {
         die "Cannot coerce a " . ( ref $params ) . " into a " . $self->model;

@@ -72,12 +72,13 @@ FOREACH property = model.properties.keys;
     __PACKAGE__->many_to_many (
         '[% property %]',
         '[% p.item('x-dbic-bridge-name') %]',
-        '[% p.item('x-dbic-them') %]'
+        '[% p.item('x-dbic-them') %]',
     );
     __PACKAGE__->has_many (
         '[% p.item('x-dbic-bridge-name') %]',
         'RideFlow::DB::Result::[% p.item('x-dbic-bridge').replace('#/definitions/','') %]',
-        '[% p.item('x-dbic-key') %]'
+        '[% p.item('x-dbic-key') %]',
+        { cascade_delete => 0 },
     );
 [%
     ELSE
@@ -85,7 +86,11 @@ FOREACH property = model.properties.keys;
     __PACKAGE__->[% p.item('x-dbic-rel') %](
         '[% property %]',
         'RideFlow::DB::Result::[% other_model %]',
-        '[% p.item('x-dbic-key') %]'
+        '[% p.item('x-dbic-key') %]',[%
+        IF p.item('x-dbic-rel').match('might_have|has_many'); %]
+        { cascade_delete => 0 },[%
+        END;
+        %]
     );
 [%
     END;

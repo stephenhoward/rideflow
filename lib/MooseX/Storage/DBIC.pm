@@ -1,6 +1,7 @@
 package MooseX::Storage::DBIC;
 
 use Moose::Role;
+use Scalar::Util 'blessed';
 
 
 # The name of the DBIx::Class ResultClass is stored here:
@@ -64,7 +65,7 @@ sub _dbic_columns {
     my ( $self ) = @_;
 
     return [
-        map  { warn $_->name; $_->name }
+        map  { $_->name }
         grep { $_->does('DBIC') && ! $_->is_relationship }
         $self->meta->get_all_attributes
     ];
@@ -81,14 +82,27 @@ sub _dbic_relationships {
 }
 
 sub _new_from_db {
-    my ( $class, $db_result ) = @_;
+    my ( $class, $db_result, $no_rel ) = @_;
 
     return undef unless $db_result;
 
     my $model = $class->new( _dbic_result => $db_result );
 
+    my %relationships = map { $_ => 1 } @{$model->_dbic_relationships};
+
     foreach my $attr ( grep { defined $db_result->$_ } @{$model->_dbic_attrs} ) {
-        $model->$attr( $db_result->$attr );
+
+        next if $no_rel && exists $relationships{$attr};
+
+        if ( blessed $db_result->$attr && $db_result->$attr->isa('DBIx::Class::ResultSet') ) {
+
+            $model->$attr( [ map { $_ } $db_result->$attr ] );
+
+        }
+        else {
+            $model->$attr( $db_result->$attr );
+        }
+
     }
 
     return $model;
@@ -124,7 +138,26 @@ before '_process_options' => sub {
     $options->{trigger} //= sub {
         my( $instance, $value, $old_value ) = @_;
 
-        $instance->_dbic_result->$name( $value );
+        if ( ref $value eq 'ARRAY' ) {
+
+            $value = [ map { ref $_ && $_->can('dump') ? $_->_dbic_result : $_ } @$value ];
+
+        }
+        elsif ( ref $value && $value->can('dump') ) {
+
+            $value = $value->_dbic_result;
+        }
+
+        my $attr = $instance->meta->find_attribute_by_name($name);
+
+        if ( $attr && $attr->rel && $attr->rel eq 'many_to_many' ) {
+            my $setter = 'set_' . $name;
+            $instance->_dbic_result->$setter( $value );
+        }
+        else {
+            $instance->_dbic_result->$name( $value );
+
+        }
     }
 };
 

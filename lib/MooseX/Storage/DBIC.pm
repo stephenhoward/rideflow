@@ -86,26 +86,27 @@ sub _new_from_db {
 
     return undef unless $db_result;
 
-    my $model = $class->new( _dbic_result => $db_result );
+    my $data  = {};
 
-    my %relationships = map { $_ => 1 } @{$model->_dbic_relationships};
+    my %relationships = map { $_ => 1 } @{$class->_dbic_relationships};
 
-    foreach my $attr ( grep { defined $db_result->$_ } @{$model->_dbic_attrs} ) {
+    foreach my $attr ( grep { defined $db_result->$_ } @{$class->_dbic_attrs} ) {
 
         next if $no_rel && exists $relationships{$attr};
 
         if ( blessed $db_result->$attr && $db_result->$attr->isa('DBIx::Class::ResultSet') ) {
 
-            $model->$attr( [ map { $_ } $db_result->$attr ] );
+            my $factory = RideFlow::Model->db( $db_result->$attr->result_class );
+            $data->{$attr} = [ map { $factory->build( $_, 1 ) } $db_result->$attr ];
 
         }
         else {
-            $model->$attr( $db_result->$attr );
+            $data->{$attr} = $db_result->$attr;
         }
 
     }
 
-    return $model;
+    return $class->new( _dbic_result => $db_result, %$data );
 }
 
 package RideFlow::Model::Meta::Attribute::Trait::DBIC;
@@ -113,6 +114,7 @@ use Moose::Role;
 Moose::Util::meta_attribute_alias('DBIC');
 
 use Moose::Util::TypeConstraints 'enum';
+use Scalar::Util 'blessed';
 
 has rel => (
     is  => 'ro',
@@ -135,22 +137,14 @@ has primary_key => (
 before '_process_options' => sub {
     my ( $self, $name, $options ) = @_;
 
+    return unless grep { $_ eq __PACKAGE__ } @{$options->{traits} || []};
+
     $options->{trigger} //= sub {
         my( $instance, $value, $old_value ) = @_;
 
-        if ( ref $value eq 'ARRAY' ) {
+        $value = $self->_value_to_db($value);
 
-            $value = [ map { ref $_ && $_->can('dump') ? $_->_dbic_result : $_ } @$value ];
-
-        }
-        elsif ( ref $value && $value->can('dump') ) {
-
-            $value = $value->_dbic_result;
-        }
-
-        my $attr = $instance->meta->find_attribute_by_name($name);
-
-        if ( $attr && $attr->rel && $attr->rel eq 'many_to_many' ) {
+        if ( ( $options->{rel} || '' ) eq 'many_to_many' ) {
             my $setter = 'set_' . $name;
             $instance->_dbic_result->$setter( $value );
         }
@@ -160,6 +154,22 @@ before '_process_options' => sub {
         }
     }
 };
+
+sub _value_to_db {
+    my ( $self, $value ) = @_;
+
+        if ( ref $value eq 'ARRAY' ) {
+
+            return [ map { $self->_value_to_db($_) } @$value ];
+        }
+        elsif ( blessed $value && $value->can('does') && $value->does('MooseX::Storage::DBIC') ) {
+
+            return $value->_dbic_result;
+        }
+
+        return $value;
+
+}
 
 package Moose::Meta::Attribute::Custom::Trait::DBIC;
     sub register_implementation { 

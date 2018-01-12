@@ -6,6 +6,8 @@ use MooseX::MarkAsMethods autoclean => 1;
 
 extends 'RideFlow::DB::Result';
 
+sub model { '[% model_name %]' }
+
 __PACKAGE__->table('[% model.item('x-dbic-table') %]');
 __PACKAGE__->add_columns(
 [%
@@ -64,13 +66,14 @@ FOREACH property = model.properties.keys;
     p = model.properties.$property;
     other_model = p.type == 'array' ? p.items.item('$ref') : p.item('$ref');
     other_model = other_model.replace('#/definitions/','');
+    indexed = p.item('x-dbic-bridge-indexed') ? 1 : 0;
 
     NEXT UNLESS p.item('x-dbic-rel');
 
     IF p.item('x-dbic-rel') == 'many_to_many'
 -%]
     __PACKAGE__->many_to_many (
-        '[% property %]',
+        '[% property _ ( indexed ? '_raw' : '' ) %]',
         '[% p.item('x-dbic-bridge-name') %]',
         '[% p.item('x-dbic-them') %]',
     );
@@ -78,9 +81,24 @@ FOREACH property = model.properties.keys;
         '[% p.item('x-dbic-bridge-name') %]',
         'RideFlow::DB::Result::[% p.item('x-dbic-bridge').replace('#/definitions/','') %]',
         '[% p.item('x-dbic-key') %]',
-        { cascade_delete => 0 },
+        { cascade_delete => 0[% indexed ? ", order_by => 'index ASC'" : '' %] },
     );
 [%
+        IF indexed;
+%]
+    sub [% property %] {
+        my ( $self ) = @_;
+
+        return $self->_get_indexed('[% property %]');
+    }
+
+    sub set_[% property %] {
+        my $self = shift;
+
+        return $self->_set_indexed('[% p.item('x-dbic-bridge-name') %]' => '[% p.item('x-dbic-them') %]', @_);
+    }
+[%
+        END;
     ELSE
 -%]
     __PACKAGE__->[% p.item('x-dbic-rel') %](

@@ -78,40 +78,4 @@ sub _get_all_attributes {
     return grep { $_->name !~ /^_/ } $self->meta->get_all_attributes;
 }
 
-sub _relationship_accessor {
-
-    my $self     = shift;
-    my $property = shift;
-
-    if ( ! @_ ) {
-
-        my $getter = '_get_' . $property;
-        return $self->$getter;
-    }
-    else {
-        my $setter = '_set_' . $property;
-        $self->$setter( $self->_transform_relationship_input( $property, @_ ) );
-    }
-}
-
-sub _transform_relationship_input {
-    my ( $self, $property, $value ) = @_;
-
-    my $attr    = $self->meta->find_attribute_by_name($property);
-    my $type    = $attr->type_constraint->type_parameter;
-    my $factory = RideFlow::Model->m($type);
-
-    return ( $attr->rel =~ /to_many$/ )
-        ? [
-            map { $factory->build($_, 1 ) }
-            ( ref $value eq 'ARRAY'
-                ? @$value
-                : defined $value
-                    ? ( $value )
-                    : ()
-            )
-        ]
-        : $factory->build($_);
-}
-
 1;

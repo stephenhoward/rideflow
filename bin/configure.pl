@@ -43,14 +43,21 @@ $tt->process('config.yaml.tt', {
 
 my $config  = LoadFile('var/config/development.config.yaml');
 
-
+my @types;
 foreach my $name ( keys %$models ) {
     process_model( $name );
 
-    model_output( $name, $models->{$name} ) if $models->{$name}{type} eq 'object' && ! ( $models->{$name}{'x-scope'} || '' ) ne 'dbic';
+    if ( $models->{$name}{type} eq 'object' && ! ( $models->{$name}{'x-scope'} || '' ) ne 'dbic' ) {
+        push @types, $name;
+        model_output( $name, $models->{$name} );
+    }
     db_output( $name, $models->{$name} ) if $models->{$name}{'x-dbic-table'};
 
 }
+
+$tt->process( 'models.tt', { models => \@types }, 'var/lib/RideFlow/Models.pm' )
+    or die $tt->error();
+
 my $schema = build_schema( $models );
 sql_output( $schema );
 remove_internal($models->{$_} ) foreach keys %$models;

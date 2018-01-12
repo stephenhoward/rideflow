@@ -11,7 +11,7 @@ MACRO attr_type(property,embedded) BLOCK;
         embedded ? "ArrayRef[Num]" : "'ArrayRef[Num]'";
     ELSIF property.item('$ref');
         class = property.item('$ref').replace('((.+?)/)+','');
-        embedded ? 'RideFlow::Model::' _ class : "'Maybe[RideFlow::Model::" _ class _ "]'";
+        embedded ? 'RideFlow::Model::' _ class : "'Maybe_" _ class _ "'";
     ELSIF property.type == 'string';
         IF property.enum;
             "enum(['" _ property.enum.join("','") _ "'])";
@@ -22,9 +22,14 @@ MACRO attr_type(property,embedded) BLOCK;
         END;
     ELSIF property.type == 'array';
         "'" UNLESS embedded;
-        "ArrayRef[";
-            attr_type(property.items,1);
-        "]";
+        IF property.item('x-dbic-rel');
+            class = property.items.item('$ref').replace('((.+?)/)+','');
+            "Array_of_" _ class;
+        ELSE;
+            "ArrayRef[";
+                attr_type(property.items,1);
+            "]";
+        END;
         "'" UNLESS embedded;
     ELSE;
         "'Maybe[" UNLESS embedded;
@@ -60,10 +65,9 @@ has '[% property %]' => (
     END;
 
     IF p.item('x-dbic-rel');
-        "\n    rel => '" _ p.item('x-dbic-rel') _ "',";
+        "\n    rel    => '" _ p.item('x-dbic-rel') _ "',";
         "\n    mm_rel => '" _ p.item('x-dbic-bridge-name') _ "'," IF p.item('x-dbic-rel') == 'many_to_many';
-        "\n    reader => '_get_" _ property _ "',";
-        "\n    writer => '_set_" _ property _ "',";
+        "\n    coerce => 1,";
     END;
 
     "\n    primary_key => 1," IF model.item('x-dbic-key') == property;
@@ -72,14 +76,5 @@ has '[% property %]' => (
  %]
 );
 [% END %]
-[%
-FOREACH property = model.properties.keys;
-    p = model.properties.$property;
-    NEXT UNLESS p.item('x-dbic-rel');
-%]
-sub [% property %] { my $self = shift; return $self->_relationship_accessor('[% property %]',@_); }
-[%
-END;
-%]
 
 1;

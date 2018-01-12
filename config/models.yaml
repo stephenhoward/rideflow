@@ -141,11 +141,26 @@ Route:
                   type: array
                   items:
                     $ref: '#/definitions/location'
+              color:
+                  type: string
+                  enum:
+                    - Red
+                    - Green
+                    - Blue
+                    - Orange
+                    - Yellow
+                    - Purple
+                    - Pink
+                    - Silver
+                    - Gold
+                    - Gray
+                    - Black
               stops:
                   type: array
                   x-dbic-rel: many_to_many
                   x-dbic-them: stop
                   x-dbic-bridge-name: route_stops
+                  x-dbic-bridge-indexed: true
                   x-dbic-key: route_id
                   x-dbic-bridge: '#/definitions/RouteStop'
                   items:
@@ -201,6 +216,8 @@ RouteStop:
             x-dbic-rel: belongs_to
             x-dbic-key: route_id
             $ref: '#/definitions/Route'
+        index:
+            type: integer
 RouteSession:
     description: A period of time when a vehicle is actively plying a route
     x-rideflow-scope: protected

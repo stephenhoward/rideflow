@@ -21,10 +21,13 @@ if ( $password ne $password2 ) {
     exit;
 }
 
-my $user = RideFlow::Model->m('User')->create({
+my $user = RideFlow::Model->m('User')->build({
     email    => $username,
-    password => $password,
-});
+})->save();
+
+$user->set_password($password);
+
+my $user_check = RideFlow::Model->m('User')->fetch( id => $user->id );
 
 sub prompt {
     my( $text ) = @_;

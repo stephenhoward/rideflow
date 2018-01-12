@@ -1,0 +1,14 @@
+package RideFlow::Models;
+
+use strict;
+use warnings;
+
+BEGIN {
+
+    use RideFlow::Model;
+
+    RideFlow::Model->_load_types( qw( [% models.join(' ') %] ) );
+
+};
+
+1;

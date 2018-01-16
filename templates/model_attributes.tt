@@ -47,7 +47,6 @@ use Moose::Util::TypeConstraints 'enum';
 use UUID 'uuid';
 
 extends 'RideFlow::Model::Base';
-with 'MooseX::Storage::DBIC';
 
 sub dbic { '[% model_name %]' }
 

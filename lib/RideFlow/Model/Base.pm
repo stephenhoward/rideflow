@@ -54,6 +54,7 @@ sub dump {
     return {
         map  { $_ => $self->_dump_property( $self->$_ ) }
         grep { defined $self->$_ }
+        map  { $_->name }
         @{$self->_dbic_attrs}
     };
 }

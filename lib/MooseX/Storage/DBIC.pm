@@ -20,6 +20,7 @@ has '_dbic_result',
         my $result =  $self->_schema->resultset( $self->dbic )->new({
             map  { $_ => $self->$_ }
             grep { defined $self->$_ }
+            map { $_->name }
             @{$self->_dbic_columns}
         });
 
@@ -29,14 +30,48 @@ has '_dbic_result',
 sub db_save {
     my ( $self ) = @_;
 
-    if ( $self->_dbic_result && $self->_dbic_result->in_storage ) {
-        $self->_dbic_result->update;
-    }
-    else {
-        $self->_dbic_result( $self->_schema->resultset( $self->dbic )->create(
-            { map { $_ => $self->$_ } @{$self->_dbic_columns} }
-        ))->insert();
-    }
+    my $dbic_result = $self->_dbic_result;
+
+    $self->_schema->txn_do( sub {
+
+        # First update/insert non-relationships
+        for my $attr ( @{$self->_dbic_columns} ) {
+
+            my $name  = $attr->name;
+            warn "set $name";
+
+            my $value = $self->_value_to_db( $self->$name );
+            warn $value;
+
+            $dbic_result->$name( $value );
+        }
+
+        if ( $dbic_result->in_storage ) {
+            $dbic_result->update;
+        }
+        else {
+            $dbic_result->insert;
+        }
+
+        # Then, once we're sure the record exists, update relationships
+        for my $attr ( @{$self->_dbic_relationships} ) {
+
+            my $name  = $attr->name;
+            my $value = $self->_value_to_db( $self->$name );
+
+            if ( $attr->is_many_to_many ) {
+                my $setter = 'set_' . $name;
+                $dbic_result->$setter( $value );
+            }
+            else {
+                $dbic_result->$name( $value );
+
+            }
+        }
+
+        $dbic_result->update;
+
+    });
 
     return $self;
 }
@@ -44,7 +79,7 @@ sub db_save {
 sub db_delete {
     my ( $self ) = @_;
 
-    if ( $self->_dbic_result && $self->_dbic_result->in_storage ) {
+    if ( $self->_dbic_result->in_storage ) {
         $self->_dbic_result->delete;
     }
 
@@ -55,7 +90,6 @@ sub _dbic_attrs {
     my ( $self ) = @_;
 
     return [
-        map  { $_->name }
         grep { $_->does('DBIC') }
         $self->meta->get_all_attributes
     ];
@@ -65,7 +99,6 @@ sub _dbic_columns {
     my ( $self ) = @_;
 
     return [
-        map  { $_->name }
         grep { $_->does('DBIC') && ! $_->is_relationship }
         $self->meta->get_all_attributes
     ];
@@ -75,7 +108,6 @@ sub _dbic_relationships {
     my ( $self ) = @_;
 
     return [
-        map  { $_->name }
         grep { $_->does('DBIC') && $_->is_relationship }
         $self->meta->get_all_attributes
     ];
@@ -88,9 +120,9 @@ sub _new_from_db {
 
     my $data  = {};
 
-    my %relationships = map { $_ => 1 } @{$class->_dbic_relationships};
+    my %relationships = map { $_->name => 1 } @{$class->_dbic_relationships};
 
-    foreach my $attr ( grep { defined $db_result->$_ } @{$class->_dbic_attrs} ) {
+    foreach my $attr ( grep { defined $db_result->$_ } map { $_->name } @{$class->_dbic_attrs} ) {
 
         next if $no_rel && exists $relationships{$attr};
 
@@ -107,6 +139,22 @@ sub _new_from_db {
     }
 
     return $class->new( _dbic_result => $db_result, %$data );
+}
+
+sub _value_to_db {
+    my ( $self, $value ) = @_;
+
+        if ( ref $value eq 'ARRAY' ) {
+
+            return [ map { $self->_value_to_db($_) } @$value ];
+        }
+        elsif ( blessed $value && $value->can('does') && $value->does('MooseX::Storage::DBIC') ) {
+
+            return $value->_dbic_result;
+        }
+
+        return $value;
+
 }
 
 package RideFlow::Model::Meta::Attribute::Trait::DBIC;
@@ -133,43 +181,6 @@ has primary_key => (
     isa => 'Bool',
     predicate => 'is_primary_key'
 );
-
-before '_process_options' => sub {
-    my ( $self, $name, $options ) = @_;
-
-    return unless grep { $_ eq __PACKAGE__ } @{$options->{traits} || []};
-
-    $options->{trigger} //= sub {
-        my( $instance, $value, $old_value ) = @_;
-
-        $value = $self->_value_to_db($value);
-
-        if ( ( $options->{rel} || '' ) eq 'many_to_many' ) {
-            my $setter = 'set_' . $name;
-            $instance->_dbic_result->$setter( $value );
-        }
-        else {
-            $instance->_dbic_result->$name( $value );
-
-        }
-    }
-};
-
-sub _value_to_db {
-    my ( $self, $value ) = @_;
-
-        if ( ref $value eq 'ARRAY' ) {
-
-            return [ map { $self->_value_to_db($_) } @$value ];
-        }
-        elsif ( blessed $value && $value->can('does') && $value->does('MooseX::Storage::DBIC') ) {
-
-            return $value->_dbic_result;
-        }
-
-        return $value;
-
-}
 
 package Moose::Meta::Attribute::Custom::Trait::DBIC;
     sub register_implementation { 

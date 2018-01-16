@@ -111,7 +111,7 @@ sub _deflate_coordinates {
     return join( ',' =>
         map { '(' . join( ',' => @$_ ) . ')' }
         @$value
-    );
+    ) || undef;
 }
 
 1;

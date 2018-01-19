@@ -13,7 +13,7 @@ __PACKAGE__->load_components(qw(
 ));
 
 
-sub _get_indexed {
+sub _get_property {
     my ( $self, $property ) = @_;
 
     my $accessor = $property . '_raw';

@@ -19,7 +19,7 @@ sub m {
 
     my $namespace = $class->namespace;
 
-    $name =~ s/^$namespace:://;
+    $name =~ s/^$namespace\:://;
 
     return $class->new( model => "$namespace::$name" );
 }

@@ -52,7 +52,7 @@ sub dbic { '[% model_name %]' }
 
 [% FOREACH property = model.properties.keys; p = model.properties.$property %]
 has '[% property %]' => (
-    is => 'rw',
+    is => '[% p.readOnly ? 'ro' : 'rw' %]',
     isa => [% attr_type(p) %],[%
 
     "\n    traits => ['DBIC']," UNLESS p.item('x-dbic-ignore');

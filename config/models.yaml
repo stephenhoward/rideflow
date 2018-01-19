@@ -181,6 +181,7 @@ Stop:
                   $ref: '#/definitions/Arrival'
               routes:
                   type: array
+                  readOnly: true
                   x-dbic-rel: many_to_many
                   x-dbic-them: route
                   x-dbic-bridge-name: route_stops

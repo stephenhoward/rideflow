@@ -14,6 +14,7 @@ requires '_schema';
 has '_dbic_result',
     is      => 'rw',
     isa     => 'Maybe[Object]',
+    lazy    => 1,
     default => sub {
         my ( $self ) = @_;
 

@@ -66,14 +66,15 @@ FOREACH property = model.properties.keys;
     p = model.properties.$property;
     other_model = p.type == 'array' ? p.items.item('$ref') : p.item('$ref');
     other_model = other_model.replace('#/definitions/','');
-    indexed = p.item('x-dbic-bridge-indexed') ? 1 : 0;
+    indexed  = p.item('x-dbic-bridge-indexed') ? 1 : 0;
+    readonly = p.readOnly ? 1 : 0;
 
     NEXT UNLESS p.item('x-dbic-rel');
 
     IF p.item('x-dbic-rel') == 'many_to_many'
 -%]
     __PACKAGE__->many_to_many (
-        '[% property _ ( indexed ? '_raw' : '' ) %]',
+        '[% property _ ( indexed || readonly ? '_raw' : '' ) %]',
         '[% p.item('x-dbic-bridge-name') %]',
         '[% p.item('x-dbic-them') %]',
     );
@@ -89,13 +90,27 @@ FOREACH property = model.properties.keys;
     sub [% property %] {
         my ( $self ) = @_;
 
-        return $self->_get_indexed('[% property %]');
+        return $self->_get_property('[% property %]');
     }
 
     sub set_[% property %] {
         my $self = shift;
 
         return $self->_set_indexed('[% p.item('x-dbic-bridge-name') %]' => '[% p.item('x-dbic-them') %]', @_);
+    }
+[%
+        ELSIF readonly;
+%]
+    sub [% property %] {
+        my ( $self ) = @_;
+
+        return $self->_get_property('[% property %]');
+    }
+
+    sub set_[% property %] {
+        my $self = shift;
+
+        # Do Nothing
     }
 [%
         END;

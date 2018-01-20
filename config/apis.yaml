@@ -443,6 +443,22 @@ apis:
                                 type: array
                                 items:
                                     $ref: '#/definitions/Route'
+                post:
+                    tags:
+                        - routes
+                    description: Create a new Route
+                    x-mojo-to: 'route#create'
+                    parameters:
+                    - in: body
+                      name: model
+                      required: true
+                      schema:
+                        $ref: '#/definitions/Route'
+                    responses:
+                        '200':
+                            description: The newly created route
+                            schema:
+                                $ref: '#/definitions/Route'
             '/routes/{uuid}':
                 get:
                     tags:

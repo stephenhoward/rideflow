@@ -38,21 +38,21 @@ sub _load_types {
 
         coerce   "Array_of_$type",
             from "Array_of_DB_$type",
-            via  { [ map { $package->_new_from_db($_) } @{$_} ] },
+            via  { [ map { $package->new_from_db($_) } @{$_} ] },
 
             from 'Array_of_HashRef',
             via  { [ map { $package->new($_) } @{$_} ] };
 
         coerce   "Maybe_$type",
             from "RideFlow::DB::Result::$type",
-            via  { $package->_new_from_db($_) },
+            via  { $package->new_from_db($_) },
 
             from 'HashRef',
             via { $package->new($_) };
 
         coerce   "RideFlow::Model::$type",
             from "RideFlow::DB::Result::$type",
-            via  { $package->_new_from_db($_) },
+            via  { $package->new_from_db($_) },
 
             from 'HashRef',
             via { $package->new($_) };

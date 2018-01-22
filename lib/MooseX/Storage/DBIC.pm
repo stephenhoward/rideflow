@@ -18,15 +18,39 @@ has '_dbic_result',
     default => sub {
         my ( $self ) = @_;
 
-        my $result =  $self->_schema->resultset( $self->dbic )->new({
-            map  { $_ => $self->$_ }
-            grep { defined $self->$_ }
-            map { $_->name }
-            @{$self->_dbic_columns}
-        });
-
-        return $result;
+        return $self->_schema->resultset( $self->dbic )->new({});
     };
+
+sub new_from_db {
+    my ( $class, $db_result, $no_rel ) = @_;
+
+    return undef unless $db_result;
+
+    my $data  = {};
+
+    my %relationships = map { $_->name => 1 } @{$class->_dbic_relationships};
+
+    foreach my $attr ( grep { defined $db_result->$_ } map { $_->name } @{$class->_dbic_attrs} ) {
+
+        next if $no_rel && exists $relationships{$attr};
+
+        if ( blessed $db_result->$attr && $db_result->$attr->isa('DBIx::Class::ResultSet') ) {
+
+            my $attribute = $class->meta->get_attribute($attr);
+
+            if ( my $factory = ( $attribute->type_constraint->name =~ /ArrayRef\[(.+?)\]/ )[0] ) {
+
+                $data->{$attr} = [ map { $factory->new_from_db( $_, 1 ) } $db_result->$attr ];
+            }
+        }
+        else {
+            $data->{$attr} = $db_result->$attr;
+        }
+
+    }
+
+    return $class->new( _dbic_result => $db_result, %$data );
+}
 
 sub db_save {
     my ( $self ) = @_;
@@ -36,16 +60,7 @@ sub db_save {
     $self->_schema->txn_do( sub {
 
         # First update/insert non-relationships
-        for my $attr ( @{$self->_dbic_columns} ) {
-
-            my $name  = $attr->name;
-            warn "set $name";
-
-            my $value = $self->_value_to_db( $self->$name );
-            warn $value;
-
-            $dbic_result->$name( $value );
-        }
+        $self->_populate_dbic_result;
 
         if ( $dbic_result->in_storage ) {
             $dbic_result->update;
@@ -114,32 +129,16 @@ sub _dbic_relationships {
     ];
 }
 
-sub _new_from_db {
-    my ( $class, $db_result, $no_rel ) = @_;
+sub _populate_dbic_result {
+    my ( $self ) = @_;
 
-    return undef unless $db_result;
+    for my $attr ( @{$self->_dbic_columns} ) {
 
-    my $data  = {};
+        my $name  = $attr->name;
+        my $value = $self->_value_to_db( $self->$name );
 
-    my %relationships = map { $_->name => 1 } @{$class->_dbic_relationships};
-
-    foreach my $attr ( grep { defined $db_result->$_ } map { $_->name } @{$class->_dbic_attrs} ) {
-
-        next if $no_rel && exists $relationships{$attr};
-
-        if ( blessed $db_result->$attr && $db_result->$attr->isa('DBIx::Class::ResultSet') ) {
-
-            my $factory = RideFlow::Model->db( $db_result->$attr->result_class );
-            $data->{$attr} = [ map { $factory->build( $_, 1 ) } $db_result->$attr ];
-
-        }
-        else {
-            $data->{$attr} = $db_result->$attr;
-        }
-
+        $self->_dbic_result->$name( $value );
     }
-
-    return $class->new( _dbic_result => $db_result, %$data );
 }
 
 sub _value_to_db {
@@ -151,11 +150,11 @@ sub _value_to_db {
         }
         elsif ( blessed $value && $value->can('does') && $value->does('MooseX::Storage::DBIC') ) {
 
+            $value->_populate_dbic_result;
             return $value->_dbic_result;
         }
 
         return $value;
-
 }
 
 package RideFlow::Model::Meta::Attribute::Trait::DBIC;

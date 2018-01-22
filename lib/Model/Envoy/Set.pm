@@ -51,7 +51,7 @@ sub build {
 
         my $type = ( ( ref $params ) =~ / ( [^:]+ ) $ /x )[0];
 
-        return $self->m( $type )->model->_new_from_db($params, $no_rel);
+        return $self->m( $type )->model->new_from_db($params, $no_rel);
     }
     else {
         die "Cannot coerce a " . ( ref $params ) . " into a " . $self->model;
@@ -80,7 +80,7 @@ sub fetch {
     if ( my $result = ($self->model->_schema->resultset( $self->model->dbic )
         ->search(\%params))[0] ) {
 
-        return $self->model->_new_from_db($result);
+        return $self->model->new_from_db($result);
     }
 
     return undef;
@@ -91,7 +91,7 @@ sub list {
 
     return [
         map {
-            $self->model->_new_from_db($_);
+            $self->model->new_from_db($_);
         }
         $self->model->_schema->resultset( $self->model->dbic )->search()
     ];

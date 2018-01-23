@@ -36,7 +36,7 @@ sub new_from_db {
 
         if ( blessed $db_result->$attr && $db_result->$attr->isa('DBIx::Class::ResultSet') ) {
 
-            my $attribute = $class->meta->get_attribute($attr);
+            my $attribute = $class->meta->find_attribute_by_name($attr);
 
             if ( my $factory = ( $attribute->type_constraint->name =~ /ArrayRef\[(.+?)\]/ )[0] ) {
 

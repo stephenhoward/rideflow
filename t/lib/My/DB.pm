@@ -10,14 +10,13 @@ use DBD::Mock;
 DBI->install_driver('Mock');
 
 sub db_connect {
-    my( $schema ) = @_;
+    my( $schema, $filename ) = @_;
 
-    return $schema->connect( 'dbi:SQLite:dbname=/tmp/testdata','','');
+    $filename ||= '/tmp/testdata';
+
+    return $schema->connect( "dbi:SQLite:dbname=$filename",'','');
 }
 
-sub db_remove {
-    unlink '/tmp/testdata';
-}
 __PACKAGE__->load_namespaces;
 
 1;

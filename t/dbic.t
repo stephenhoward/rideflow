@@ -1,6 +1,8 @@
 
 use lib 't/lib';
 
+unlink '/tmp/dbic';
+
 {
     package My::TestModel;
 
@@ -12,7 +14,7 @@ use lib 't/lib';
     sub dbic { 'Test' }
 
     sub _schema {
-        return My::DB->db_connect();
+        return My::DB->db_connect('/tmp/dbic');
     }
 
     has 'id' => (
@@ -112,8 +114,6 @@ subtest 'Model from DB Result' => sub {
     is( $test2->name, 'baz' );
 
 };
-
-My::DB->db_remove;
 
 done_testing;
 

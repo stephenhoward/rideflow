@@ -21,7 +21,21 @@ sub update {
 
         if ( exists $hashref->{$name} ) {
 
-            $self->$name( $hashref->{$name} );
+            my $value = $hashref->{$name};
+
+            if ( ref $value && $attr->is_relationship ) {
+
+                my $type = ( $attr->type_constraint->name =~ / ArrayRef \[ (.+?) \] | Maybe \[ (.+?) \] /x )[0];
+
+                if ( ref $value eq 'HASH' ) {
+                    $value = new $type($value);
+                }
+                elsif ( ref $value eq 'ARRAY' ) {
+                    $value = [ map { ref $_ eq 'HASH' ? new $type($_) : $_ } @$value ];
+                }
+            }
+
+            $self->$name( $value );
         }
     }
 
@@ -43,7 +57,7 @@ sub dump {
         map  { $_ => $self->_dump_property( $self->$_ ) }
         grep { defined $self->$_ }
         map  { $_->name }
-        @{$self->_dbic_attrs}
+        $self->_get_all_attributes
     };
 }
 
@@ -56,7 +70,7 @@ sub _dump_property {
 
     return { map { $_ => $self->_dump_property( $value->{$_} ) } keys %$value } if ref $value eq 'HASH';
 
-    return $value->dump if $value->isa('RideFlow::Model::Base');
+    return $value->dump if $value->can('does') && $value->does('Model::Envoy');
 
     return undef;
 }

@@ -44,6 +44,9 @@ use lib 't/lib';
 
 use Test::More;
 
+
+My::TestModel->_schema->storage->dbh->do( My::DB::Result::Test->sql );
+
 my $test = new My::TestModel(
     id         => 1,
     name       => 'foo',
@@ -85,9 +88,9 @@ subtest "Saving a Model" => sub {
     isa_ok( $test->related->[0], 'My::TestModel' );
     is( $test->related->[0]->id, 2 );
 
-    is( $test->_dbic_result->id, 1);
-    is( $test->_dbic_result->name, 'foo');
-    is( scalar $test->_dbic_result->related->all, 1 );
+    is( $test->_dbic_result->id, 1, 'check db id');
+    is( $test->_dbic_result->name, 'foo', 'check db name');
+    is( scalar $test->_dbic_result->related->all, 1, 'Count how many related' );
 };
 
 $test->db_delete;
@@ -109,6 +112,8 @@ subtest 'Model from DB Result' => sub {
     is( $test2->name, 'baz' );
 
 };
+
+My::DB->db_remove;
 
 done_testing;
 

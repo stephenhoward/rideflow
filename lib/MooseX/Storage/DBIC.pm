@@ -72,17 +72,7 @@ sub db_save {
         # Then, once we're sure the record exists, update relationships
         for my $attr ( @{$self->_dbic_relationships} ) {
 
-            my $name  = $attr->name;
-            my $value = $self->_value_to_db( $self->$name );
-
-            if ( $attr->is_many_to_many ) {
-                my $setter = 'set_' . $name;
-                $dbic_result->$setter( $value );
-            }
-            else {
-                $dbic_result->$name( $value );
-
-            }
+            $self->_db_save_relationship( $attr );
         }
 
         $dbic_result->update;
@@ -90,6 +80,29 @@ sub db_save {
     });
 
     return $self;
+}
+
+sub _db_save_relationship {
+    my ( $self, $attr ) = @_;
+
+    my $dbic_result = $self->_dbic_result;
+
+    my $name  = $attr->name;
+    my $type  = $attr->meta->get_attribute('rel')->get_value($attr);
+    my $value = $self->_value_to_db( $self->$name );
+
+    if ( $type eq 'many_to_many' ) {
+        my $setter = 'set_' . $name;
+        $dbic_result->$setter( $value );
+    }
+    elsif ( $type eq 'has_many' ) {
+
+        $dbic_result->find_or_create_related( $name => $_ )
+            foreach ( map { { $_->get_columns } } @$value );
+    }
+    else {
+        $dbic_result->set_from_related( $name => $value );
+    }
 }
 
 sub db_delete {

@@ -18,5 +18,4 @@ requires 'Data::Entropy::Algorithms';
 requires 'DateTime';
 requires 'Email::Simple';
 requires 'Email::Sender::Simple';
-requires 'DBD::Mock'; # For testing
 requires 'Devel::Cover'; # For testing

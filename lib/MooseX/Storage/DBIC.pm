@@ -175,7 +175,6 @@ use Moose::Role;
 Moose::Util::meta_attribute_alias('DBIC');
 
 use Moose::Util::TypeConstraints 'enum';
-use Scalar::Util 'blessed';
 
 has rel => (
     is  => 'ro',

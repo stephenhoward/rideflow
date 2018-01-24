@@ -4,14 +4,14 @@ use lib 't/lib';
 unlink '/tmp/dbic';
 
 {
-    package My::TestModel;
+    package My::Widget;
 
     use Moose;
     with 'MooseX::Storage::DBIC';
 
     use My::DB;
 
-    sub dbic { 'Test' }
+    sub dbic { 'Widget' }
 
     sub _schema {
         return My::DB->db_connect('/tmp/dbic');
@@ -38,7 +38,7 @@ unlink '/tmp/dbic';
 
     has 'related' => (
         is => 'rw',
-        isa => 'ArrayRef[My::TestModel]',
+        isa => 'ArrayRef[My::Widget]',
         traits => ['DBIC'],
         rel => 'has_many',
     );
@@ -47,13 +47,13 @@ unlink '/tmp/dbic';
 use Test::More;
 
 
-My::TestModel->_schema->storage->dbh->do( My::DB::Result::Test->sql );
+My::Widget->_schema->storage->dbh->do( My::DB::Result::Widget->sql );
 
-my $test = new My::TestModel(
+my $test = new My::Widget(
     id         => 1,
     name       => 'foo',
     no_storage => 'bar',
-    related    => [ new My::TestModel( id => 2 ) ],
+    related    => [ new My::Widget( id => 2 ) ],
 );
 
 subtest "Check Metadata" => sub {
@@ -71,7 +71,7 @@ subtest "Saving a Model" => sub {
     is( $test->no_storage, 'bar', "Model property without db backing");
     is( ref $test->related, 'ARRAY', "Model relationship exists");
     is( scalar @{$test->related}, 1, "Model relationship count" );
-    isa_ok( $test->related->[0], 'My::TestModel', "Related Model" );
+    isa_ok( $test->related->[0], 'My::Widget', "Related Model" );
     is( $test->related->[0]->id, 2, "Related Model id" );
 
     not( $test->_dbic_result->id, 1, "DB id");
@@ -87,7 +87,7 @@ subtest "Saving a Model" => sub {
     is( $test->no_storage, 'bar');
     is( ref $test->related, 'ARRAY');
     is( scalar @{$test->related}, 1 );
-    isa_ok( $test->related->[0], 'My::TestModel' );
+    isa_ok( $test->related->[0], 'My::Widget' );
     is( $test->related->[0]->id, 2 );
 
     is( $test->_dbic_result->id, 1, 'check db id');
@@ -99,17 +99,17 @@ $test->db_delete;
 
 subtest 'Model from DB Result' => sub {
 
-    my $schema = My::TestModel->_schema;
+    my $schema = My::Widget->_schema;
 
-    my $db_test = $schema->resultset('Test')->new({
+    my $db_test = $schema->resultset('Widget')->new({
         id => 3,
         name => 'baz',
     });
-    isa_ok( $db_test, 'My::DB::Result::Test' );
+    isa_ok( $db_test, 'My::DB::Result::Widget' );
 
-    my $test2 = My::TestModel->new_from_db($db_test);
+    my $test2 = My::Widget->new_from_db($db_test);
 
-    is( My::TestModel->new_from_db(),undef);
+    is( My::Widget->new_from_db(),undef);
     is( $test2->id, 3 );
     is( $test2->name, 'baz' );
 

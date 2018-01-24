@@ -24,14 +24,6 @@ sub m {
     return $class->new( model => "$namespace::$name" );
 }
 
-sub db {
-    my ( $class, $db_class ) = @_;
-
-    my $type = $class->namespace . '::' . $db_class->model;
-
-    return $class->new( model => $type );
-}
-
 sub build {
     my( $self, $params, $no_rel ) = @_;
 
@@ -39,7 +31,7 @@ sub build {
         die "Cannot build a ". $self->model ." from '$params'";
     }
     elsif( ref $params eq 'HASH' ) {
-        return $self->model->new(%$params);
+        return $self->model->new($params);
     }
     elsif( ref $params eq 'ARRAY' ) {
         die "Cannot build a ". $self->model ." from an Array Ref";
@@ -95,6 +87,20 @@ sub list {
         }
         $self->model->_schema->resultset( $self->model->dbic )->search()
     ];
+}
+
+sub load_types {
+    my ( $self, @types ) = @_;
+
+    my $namespace = $self->namespace;
+
+    foreach my $type ( @types ) {
+
+        die "invalid type name '$type'" unless $type =~ /^[a-z]+$/i;
+
+        eval "use $namespace\::$type";
+        die "Could not load model type '$type': $@" if $@;
+    }
 }
 
 1;

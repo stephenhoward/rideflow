@@ -2,13 +2,11 @@ package RideFlow::Models;
 
 use strict;
 use warnings;
+use RideFlow::Model;
 
-BEGIN {
+sub load_all {
 
-    use RideFlow::Model;
-
-    RideFlow::Model->_load_types( qw( [% models.join(' ') %] ) );
-
-};
+    RideFlow::Model->load_types( qw( [% models.join(' ') %] ) );
+}
 
 1;

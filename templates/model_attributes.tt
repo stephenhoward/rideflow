@@ -66,7 +66,6 @@ has '[% property %]' => (
     IF p.item('x-dbic-rel');
         "\n    rel    => '" _ p.item('x-dbic-rel') _ "',";
         "\n    mm_rel => '" _ p.item('x-dbic-bridge-name') _ "'," IF p.item('x-dbic-rel') == 'many_to_many';
-        "\n    coerce => 1,";
     END;
 
     "\n    primary_key => 1," IF model.item('x-dbic-key') == property;

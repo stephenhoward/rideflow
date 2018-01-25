@@ -73,8 +73,8 @@ Moose::Util::meta_attribute_alias('Envoy');
 
 use Moose::Util::TypeConstraints;
 
-before '_process_options' => sub {
-    my ( $self, $name, $options ) = @_;
+around '_process_options' => sub {
+    my ( $orig, $self, $name, $options ) = @_;
 
     return unless grep { $_ eq __PACKAGE__ } @{$options->{traits} || []};
 
@@ -99,13 +99,14 @@ before '_process_options' => sub {
     }
 
     $options->{coerce} = 1;
+
+    return $self->$orig($name,$options);
 };
 
 sub _coerce_array {
     my ( $self, $class ) = @_;
-    warn $class;
+
     my $type = ( $class =~ / ( [^:]+ ) $ /x )[0];
-    warn $type;
 
     unless( find_type_constraint("Array_of_$type") ) {
 

@@ -24,7 +24,7 @@ MACRO attr_type(property,embedded) BLOCK;
         "'" UNLESS embedded;
         IF property.item('x-dbic-rel');
             class = property.items.item('$ref').replace('((.+?)/)+','');
-            "ArrayRef[" _ class _ "]";
+            "ArrayRef[RideFlow::Model::" _ class _ "]";
         ELSE;
             "ArrayRef[";
                 attr_type(property.items,1);
@@ -55,7 +55,6 @@ has '[% property %]' => (
     is => '[% p.readOnly ? 'ro' : 'rw' %]',
     isa => [% attr_type(p) %],[%
 
-    "\n    traits => ['DBIC']," UNLESS p.item('x-dbic-ignore');
 
     IF p.format == 'uuid';
         "\n    lazy => 1,\n    default => sub { uuid() },";
@@ -64,8 +63,11 @@ has '[% property %]' => (
     END;
 
     IF p.item('x-dbic-rel');
+        "\n    traits => ['DBIC','Envoy'],";
         "\n    rel    => '" _ p.item('x-dbic-rel') _ "',";
         "\n    mm_rel => '" _ p.item('x-dbic-bridge-name') _ "'," IF p.item('x-dbic-rel') == 'many_to_many';
+    ELSE;
+        "\n    traits => ['DBIC']," UNLESS p.item('x-dbic-ignore');
     END;
 
     "\n    primary_key => 1," IF model.item('x-dbic-key') == property;

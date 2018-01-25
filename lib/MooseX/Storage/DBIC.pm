@@ -26,6 +26,9 @@ sub new_from_db {
 
     return undef unless $db_result;
 
+    die "cannot create a $class from a $db_result"
+        unless blessed $db_result && $db_result->isa( $class->dbic );
+
     my $data  = {};
 
     my %relationships = map { $_->name => 1 } @{$class->_dbic_relationships};
@@ -36,9 +39,13 @@ sub new_from_db {
 
         if ( blessed $db_result->$attr && $db_result->$attr->isa('DBIx::Class::ResultSet') ) {
 
-            my $attribute = $class->meta->find_attribute_by_name($attr);
+            my $attribute  = $class->meta->find_attribute_by_name($attr);
+            my $class_attr = $attribute->meta->find_attribute_by_name('moose_class');
+            my $factory    = $class_attr ? $class_attr->get_value($attribute) : undef;
 
-            if ( my $factory = ( $attribute->type_constraint->name =~ /ArrayRef\[(.+?)\]/ )[0] ) {
+            $factory ||= ( $attribute->type_constraint->name =~ / (?:ArrayRef|Maybe) \[ (.+?) \] /x )[0];
+
+            if ( $factory ) {
 
                 $data->{$attr} = [ map { $factory->new_from_db( $_, 1 ) } $db_result->$attr ];
             }

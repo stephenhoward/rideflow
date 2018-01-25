@@ -73,6 +73,11 @@ Moose::Util::meta_attribute_alias('Envoy');
 
 use Moose::Util::TypeConstraints;
 
+has moose_class => (
+    is  => 'ro',
+    isa => 'Str',
+);
+
 around '_process_options' => sub {
     my ( $orig, $self, $name, $options ) = @_;
 
@@ -88,10 +93,12 @@ around '_process_options' => sub {
         subtype 'Array_of_Object',
             as 'ArrayRef[Object]';
     }
-    if ( $options->{isa} =~ / ArrayRef \[ ( [^ \] ]+ ) \]/x ) {
+    if ( $options->{isa} =~ / ArrayRef \[ (.+?) \]/x ) {
+        $options->{moose_class} = $1;
         $options->{isa} = $self->_coerce_array($1);
     }
-    elsif( $options->{isa} =~ / Maybe  \[ ( [^ \] ]+ ) \]/x ) {
+    elsif( $options->{isa} =~ / Maybe  \[ (.+?) \]/x ) {
+        $options->{moose_class} = $1;
         $options->{isa} = $self->_coerce_maybe($1);
     }
     else {

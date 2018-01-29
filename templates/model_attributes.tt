@@ -14,7 +14,7 @@ MACRO attr_type(property,embedded) BLOCK;
         embedded ? 'RideFlow::Model::' _ class : "'Maybe[RideFlow::Model::" _ class _ "]'";
     ELSIF property.type == 'string';
         IF property.enum;
-            "enum(['" _ property.enum.join("','") _ "'])";
+            embedded ? 'Str' : "enum(['" _ property.enum.join("','") _ "'])";
         ELSIF property.format == 'date' || property.format == 'date-time';
             embedded ? "DateTime" : "'Maybe[DateTime]'";
         ELSE;

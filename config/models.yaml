@@ -315,6 +315,13 @@ User:
               salt:
                   type: string
                   x-scope: internal
+              roles:
+                  type: array
+                  items:
+                      type: string
+                      enum:
+                          - Driver
+                          - Manager
 PasswordReset:
     description: a temporary token to allow a user to reset their password
     x-rideflow-scope: protected

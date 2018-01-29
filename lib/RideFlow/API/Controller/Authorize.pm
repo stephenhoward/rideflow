@@ -3,6 +3,7 @@ package RideFlow::API::Controller::Authorize;
 use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JWT;
 use DateTime;
+use List::Util 'any';
 
 # Routes:
 
@@ -94,6 +95,8 @@ sub render_status {
 sub check_token {
     my ( $c, $definition, $scopes, $callback) = @_;
 
+    my $role = $c->openapi->spec()->{'x-role'} || $c->openapi->spec('/x-role');
+
     if ( my $jwt = $c->req->headers->authorization ) {
         $jwt =~ s/^Bearer\s+//;
 
@@ -102,6 +105,14 @@ sub check_token {
         };
 
         return $c->$callback($@) if $@;
+
+        if ( $role ) {
+
+            unless ( any { $_ eq $role } @{ $claims->{roles} || [] } ) {
+                return $c->$callback('Incorrect priveleges to access this resource');
+            }
+
+        }
 
         $c->stash( claims => $claims );
 
@@ -116,7 +127,8 @@ sub _generate_token {
     my ( $c, $user ) = @_;
 
     my $claims = {
-        id => $user->id
+        id    => $user->id,
+        roles => [ @{$user->roles} ],
     };
 
     return Mojo::JWT->new(

@@ -177,8 +177,11 @@ sub pg_attr_type {
 
         return 'path';
     }
-    if ( $property->{type} eq 'array' && $property->{format} eq 'point' ) {
+    if ( $property->{type} eq 'array' && ( $property->{format} || '' ) eq 'point' ) {
         return 'point';
+    }
+    if ( $property->{type} eq 'array' && ( $property->{items}{type} || '' ) eq 'string' ) {
+        return 'text[]';
     }
 
     return $openapi_to_pg_types->{ $property->{type} };

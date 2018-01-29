@@ -155,11 +155,14 @@ apis:
             description: API used by vehicles to manage passes and travel
             version: "1.0"
         basePath: /v1
+        security:
+            - Bearer: []
 
         paths:
             /sessions:
                 post:
                     description: Start a new Route Session
+                    x-mojo-to: routesession#create
                     parameters:
                       - name: session
                         in: body
@@ -167,8 +170,6 @@ apis:
                         schema:
                             $ref: '#/definitions/RouteSession'
                     responses:
-                        '501':
-                            $ref: '#/responses/NotImplemented'
                         '200':
                             description: A new Route Session
                             schema:
@@ -281,6 +282,7 @@ apis:
             title: manager transit api
             version: "1.0"
         basePath: /v1
+        x-role: manage
         security:
             - Bearer: []
         paths:

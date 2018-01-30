@@ -16,6 +16,7 @@ requires 'Mojo::JWT', '0.05';
 requires 'Digest::Bcrypt';
 requires 'Data::Entropy::Algorithms';
 requires 'DateTime';
+requires 'DateTime::Format::DateParse';
 requires 'Email::Simple';
 requires 'Email::Sender::Simple';
 requires 'Devel::Cover'; # For testing

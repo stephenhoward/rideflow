@@ -177,7 +177,7 @@ sub _value_to_db {
         return $value;
 }
 
-package RideFlow::Model::Meta::Attribute::Trait::DBIC;
+package MooseX::Meta::Attribute::Trait::DBIC;
 use Moose::Role;
 Moose::Util::meta_attribute_alias('DBIC');
 

@@ -3,7 +3,6 @@ package RideFlow::Model;
 use Moose;
 
 use Scalar::Util 'blessed';
-use Moose::Util::TypeConstraints;
 use RideFlow::Models;
 
 with 'Model::Envoy::Set';

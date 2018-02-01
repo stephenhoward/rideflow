@@ -89,6 +89,12 @@ sub db_save {
     return $self;
 }
 
+sub in_storage {
+    my ( $self ) = @_;
+
+    return $self->_dbic_result->in_storage;
+}
+
 sub _db_save_relationship {
     my ( $self, $attr ) = @_;
 

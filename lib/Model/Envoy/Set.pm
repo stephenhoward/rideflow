@@ -31,7 +31,7 @@ sub build {
         die "Cannot build a ". $self->model ." from '$params'";
     }
     elsif( ref $params eq 'HASH' ) {
-        return $self->model->new($params);
+        return $self->model->new(%$params);
     }
     elsif( ref $params eq 'ARRAY' ) {
         die "Cannot build a ". $self->model ." from an Array Ref";
@@ -79,13 +79,13 @@ sub fetch {
 }
 
 sub list {
-    my( $self ) = @_;
+    my $self = shift;
 
     return [
         map {
             $self->model->new_from_db($_);
         }
-        $self->model->_schema->resultset( $self->model->dbic )->search()
+        $self->model->_schema->resultset( $self->model->dbic )->search(@_)
     ];
 }
 

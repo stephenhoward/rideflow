@@ -31,7 +31,9 @@ my %deflators = (
     point => sub {
         my ( $value ) = @_;
 
-        return '(' . join( ',' => @$value ) . ')';
+        return scalar @$value
+            ? '(' . join( ',' => @$value ) . ')'
+            : undef;
     },
     lseg => sub {
         return _deflate_coordinates(@_);
@@ -110,6 +112,7 @@ sub _deflate_coordinates {
 
     return join( ',' =>
         map { '(' . join( ',' => @$_ ) . ')' }
+        grep { scalar @$_ }
         @$value
     ) || undef;
 }

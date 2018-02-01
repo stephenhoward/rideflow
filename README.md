@@ -16,3 +16,6 @@ Which open source license this project will be under is still under consideratio
 ## Secondary System Goals
 
 *  **Autonomous-Vehicle Ready:** The system should be designed to allow for both driver-controlled and driverless vehicles.
+
+
+See the [Project Wiki](https://github.com/stephenhoward/rideflow/wiki) for more information.

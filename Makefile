@@ -5,7 +5,7 @@ SHELL := /bin/bash
 configure:
 	perl bin/configure.pl
 
-manager:
+manage:
 	hypnotoad bin/server/manage.pl
 
 test:

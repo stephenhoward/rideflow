@@ -9,8 +9,8 @@ manage:
 	hypnotoad bin/server/manage.pl
 
 test:
-	prove t
+	prove -r t
 
 cover:
-	HARNESS_PERL_SWITCHES=-MDevel::Cover prove t
+	HARNESS_PERL_SWITCHES=-MDevel::Cover prove -r t
 	cover -report html_basic

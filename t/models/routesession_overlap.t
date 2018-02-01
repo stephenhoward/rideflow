@@ -4,7 +4,6 @@ use lib 't/lib';
 use Test::More;
 use Test::Exception;
 use RideFlow::Model;
-use DateTime;
 
 my %overlap_tests = (
 

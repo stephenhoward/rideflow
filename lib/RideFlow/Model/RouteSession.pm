@@ -12,6 +12,14 @@ override save => sub {
         $self->session_start( DateTime->now() );
     }
 
+    die "Route Session overlaps with existing session for this Driver or Vehicle" if $self->_overlaps_existing_session;
+
+    return $self->SUPER::save;
+};
+
+sub _overlaps_existing_session {
+    my ( $self ) = @_;
+
     my $dtf = $self->_schema->storage->datetime_parser;
     my $start = $dtf->format_datetime($self->session_start);
     my $end   = $self->session_end ? $dtf->format_datetime($self->session_end) : undef;
@@ -46,9 +54,8 @@ override save => sub {
         ]
     ]);
 
-    die "Route Session overlaps with existing session for this Driver or Vehicle" if @$overlaps;
+    return scalar @$overlaps ? 1 : 0;
 
-    return $self->SUPER::save;
-};
+}
 
 1;

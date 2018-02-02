@@ -4,10 +4,6 @@ use strict;
 use warnings;
 
 use base 'DBIx::Class::Schema';
-use DBI;
-use DBD::Mock;
-
-DBI->install_driver('Mock');
 
 sub db_connect {
     my( $schema, $filename ) = @_;

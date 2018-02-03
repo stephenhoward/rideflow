@@ -130,6 +130,8 @@ while( my ( $test, $params ) = each %overlap_tests ) {
         }
         else {
             dies_ok { $b->save() } 'overlap found';
+            ok( ! $b->in_storage, 'B: did not save' );
+            # dies_ok { $b->save() } 'overlap found';
         }
 
         $a->delete();

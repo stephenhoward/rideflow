@@ -37,6 +37,9 @@ FOREACH property = model.properties.keys;
         [% IF model.properties.$property.enum -%]
         extras => [ '[% model.properties.$property.enum.join("','") %]' ],
         [% END -%]
+        [%- IF model.properties.$property.type == 'boolean' -%]
+        is_boolean => 1,
+        [% END -%]
         [%- IF property == model.item('x-dbic-key') || p.item('x-unique') %]
         is_nullable => 0,
         [% END %]

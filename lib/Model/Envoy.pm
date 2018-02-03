@@ -78,7 +78,9 @@ has moose_class => (
     isa => 'Str',
 );
 
-around '_process_options' => sub {
+around '_process_options' => sub { _install_types(@_) };
+
+sub _install_types {
     my ( $orig, $self, $name, $options ) = @_;
 
     return unless grep { $_ eq __PACKAGE__ } @{$options->{traits} || []};
@@ -108,7 +110,7 @@ around '_process_options' => sub {
     $options->{coerce} = 1;
 
     return $self->$orig($name,$options);
-};
+}
 
 sub _coerce_array {
     my ( $self, $class ) = @_;

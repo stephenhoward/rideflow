@@ -155,6 +155,7 @@ apis:
             description: API used by vehicles to manage passes and travel
             version: "1.0"
         basePath: /v1
+        x-role: drive
         security:
             - Bearer: []
 
@@ -183,6 +184,7 @@ apis:
                       required: true
                 post:
                     description: Update information about the session
+                    x-mojo-to: routesession#update
                     parameters:
                       - name: session
                         in: body
@@ -194,15 +196,6 @@ apis:
                             $ref: '#/responses/NotImplemented'
                         '200':
                             description: the updated RouteSession object
-                            schema:
-                              $ref: '#/definitions/RouteSession'
-                delete:
-                    description: End the session
-                    responses:
-                        '501':
-                            $ref: '#/responses/NotImplemented'
-                        '200':
-                            description: The deactivated RouteSession object
                             schema:
                               $ref: '#/definitions/RouteSession'
             '/sessions/{session_id}/ride':

@@ -5,17 +5,22 @@ use Moose;
 # attribute definitions for this class are here:
 extends 'RideFlow::Model::Attributes::RouteSession';
 
-override save => sub {
+override save => sub { return shift->_save() };
+
+sub _save {
     my $self  = shift;
 
     if ( ! $self->id && ! $self->session_start ) {
         $self->session_start( DateTime->now() );
     }
 
-    die "Route Session overlaps with existing session for this Driver or Vehicle" if $self->_overlaps_existing_session;
+    if ( ! $self->in_storage ) {
+        die "Route Session overlaps with existing session for this Driver or Vehicle"
+            if $self->_overlaps_existing_session;
+    }
 
     return $self->SUPER::save;
-};
+}
 
 sub _overlaps_existing_session {
     my ( $self ) = @_;
@@ -39,18 +44,19 @@ sub _overlaps_existing_session {
         # new session is open-ended
         : [
             # both open-ended
-            { session_end   => undef            },
-            # new start is before existing start
+            { session_end => undef           },
+            # new start is before existing end
             { session_end => { '>', $start } },
           ];
 
     my $overlaps = RideFlow::Model->m('RouteSession')->list([
         -and => [
-            -or => [
+            ( $self->id ? { id => { '!=', $self->id } } : () ),
+            [
                 { driver_id  => $self->vehicle->id },
                 { vehicle_id => $self->vehicle->id },
             ],
-            -or => $overlap_cases,
+            $overlap_cases,
         ]
     ]);
 

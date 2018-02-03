@@ -12,5 +12,6 @@ test:
 	prove -r t
 
 cover:
+	cover -delete
 	HARNESS_PERL_SWITCHES=-MDevel::Cover prove -r t
 	cover -report html_basic

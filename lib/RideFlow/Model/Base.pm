@@ -19,6 +19,36 @@ sub fetch {
     RideFlow::Model->m($class)->fetch(@_);
 }
 
+sub delete {
+    my ( $self ) = @_;
+
+    if ( $self->can_archive ) {
+        $self->archived(1);
+        $self->save();
+    }
+    else {
+        $self->SUPER::delete;
+    }
+}
+
+sub restore {
+    my ( $self ) = @_;
+
+    if ( $self->can_archive ) {
+        $self->archived(0);
+        $self->save;
+
+        return $self;
+    }
+
+    die "Cannot restore a " . ( ref $self );
+}
+
+sub can_archive {
+    my ( $self ) = @_;
+
+    return $self->meta->find_attribute_by_name('archived');
+}
 
 1;
 
@@ -40,7 +70,9 @@ coerce 'DateTime',
     from 'Str',
     via { DateTime::Format::DateParse->parse_datetime( $_ ) };
 
-around '_process_options' => sub {
+around '_process_options' => sub { _coerce_datetimes(@_) };
+
+sub _coerce_datetimes {
 
     my ( $orig, $self, $name, $options ) = @_;
 
@@ -50,6 +82,6 @@ around '_process_options' => sub {
     }
 
     return $self->$orig($name,$options);
-};
+}
 
 1;

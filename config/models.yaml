@@ -33,6 +33,13 @@ Identifiable:
           type:   string
           format: uuid
           x-rideflow-scope: public
+Archivable:
+    description: role for things that shouldn't be deleted
+    type: object
+    properties:
+      archived:
+          type:   boolean
+          x-rideflow-scope: protected
 Locatable:
     description: role for things that have a position in space
     allOf:
@@ -132,6 +139,7 @@ Route:
     x-rideflow-scope: public
     allOf:
         - $ref: '#/definitions/Identifiable'
+        - $ref: '#/definitions/Archivable'
         - type: object
           properties:
               name:
@@ -170,6 +178,7 @@ Stop:
     x-dbic-table: stops
     x-rideflow-scope: public
     allOf:
+        - $ref: '#/definitions/Archivable'
         - $ref: '#/definitions/Locatable'
         - $ref: '#/definitions/Updateable'
         - type: object
@@ -224,6 +233,7 @@ RouteSession:
     x-rideflow-scope: protected
     x-dbic-table: route_sessions
     allOf:
+      - $ref: '#/definitions/Archivable'
       - $ref: '#/definitions/Vectorable'
       - $ref: '#/definitions/Updateable'
       - type: object
@@ -257,6 +267,7 @@ Ride:
     x-dbic-table: rides
     x-rideflow-scope: protected
     allOf:
+      - $ref: '#/definitions/Archivable'
       - $ref: '#/definitions/Vectorable'
       - type: object
         properties:
@@ -286,6 +297,7 @@ Vendor:
     x-dbic-table: vendors
     x-rideflow-scope: public
     allOf:
+        - $ref: '#/definitions/Archivable'
         - $ref: '#/definitions/Locatable'
         - type: object
           properties:
@@ -296,6 +308,7 @@ User:
     x-rideflow-scope: protected
     x-dbic-table: users
     allOf:
+        - $ref: '#/definitions/Archivable'
         - $ref: '#/definitions/Identifiable'
         - type: object
           properties:
@@ -343,6 +356,7 @@ Vehicle:
     x-rideflow-scope: protected
     allOf:
         - $ref: '#/definitions/Identifiable'
+        - $ref: '#/definitions/Archivable'
         - type: object
           required:
             - name

@@ -10,6 +10,7 @@ requires 'MooseX::MarkAsMethods', '0.15';
 requires 'List::MoreUtils::XS', '0.423'; # required by List::MoreUtils, which is required by MooseX::NonMoose
 requires 'MooseX::NonMoose', '0.26';
 requires 'DBIx::Class';
+requires 'DBIx::Class::InflateColumn::Boolean';
 requires 'DBD::Pg', '3.6.2';
 requires 'UUID', '0.27';
 requires 'Mojo::JWT', '0.05';

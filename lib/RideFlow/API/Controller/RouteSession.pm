@@ -1,7 +1,7 @@
-package RideFlow::API::Controller::Route;
+package RideFlow::API::Controller::RouteSession;
 
 use Mojo::Base 'RideFlow::API::Controller';
 
-has model => 'Route';
+has model => 'RouteSession';
 
 1;

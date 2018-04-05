@@ -46,6 +46,7 @@ is_deeply( $model->dump, $params );
 $model->save();
 
 my @fetch_tests = (
+    { result => 'n',   query => [] },
     { result => 'y',   query => [ 1 ]              },
     { result => 'y',   query => [ id   => 1 ]      },
     { result => 'y',   query => [ name => 'foo' ]  },

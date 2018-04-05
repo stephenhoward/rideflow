@@ -32,9 +32,9 @@ package My::Envoy::Widget;
         isa => 'Maybe[Str]',
     );
 
-    has 'related' => (
+    has 'parts' => (
         is => 'rw',
-        isa => 'ArrayRef[My::Envoy::Widget]',
+        isa => 'ArrayRef[My::Envoy::Part]',
         traits => ['DBIC','Envoy'],
         rel => 'has_many',
         coerce => 1,

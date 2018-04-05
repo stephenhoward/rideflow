@@ -14,10 +14,14 @@ use lib 't/lib';
 unlink '/tmp/envoy';
 
 use Test::More;
+use Test::Exception;
 use My::Envoy::Widget;
+use My::Envoy::Part;
 use My::DB::Result::Widget;
+use Data::Dumper; 
 
 My::Envoy::Widget->_schema->storage->dbh->do( My::DB::Result::Widget->sql );
+My::Envoy::Widget->_schema->storage->dbh->do( My::DB::Result::Part->sql );
 
 my $set = My::Envoy::Models->m('Widget');
 
@@ -27,7 +31,7 @@ my $params = {
     id => 1,
     name => 'foo',
     no_storage => 'bar',
-    related => [
+    parts => [
         {
             id => 2,
             name => 'baz',
@@ -38,5 +42,45 @@ my $params = {
 my $model = $set->build($params);
 
 is_deeply( $model->dump, $params );
+
+$model->save();
+
+my @fetch_tests = (
+    { result => 'y',   query => [ 1 ]              },
+    { result => 'y',   query => [ id   => 1 ]      },
+    { result => 'y',   query => [ name => 'foo' ]  },
+    { result => 'y',   query => [ id   => 1, name => 'foo' ] },
+    { result => 'n',   query => [ id   => 2 ]      },
+    { result => 'n',   query => [ name => 'nope' ] },
+    { result => 'die', query => [ bad  => 'test' ] },
+);
+
+my $db_params = { %$params };
+delete $db_params->{no_storage};
+
+for my $test ( @fetch_tests ) {
+
+    if ( $test->{result} eq 'die' ) {
+        dies_ok { $set->fetch( @{$test->{query}} ) } 'bad field spec dies';
+    }
+    else {
+
+        my $found = $set->fetch( @{$test->{query}} );
+
+        if ( $test->{result} eq 'y' ) {
+            ok( $found , 'found match' );
+            is( ref $found, 'My::Envoy::Widget');
+            is_deeply( $found->dump, $db_params );
+        }
+        elsif ( $test->{result} eq 'n' ) {
+            ok( ! defined $found , 'no match found for '. Dumper $test->{query} );
+
+        }
+        else {
+            die "cannot interperet desired outcome for test result " . $test->{result};
+        }
+    }
+
+}
 
 done_testing;

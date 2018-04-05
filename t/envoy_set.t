@@ -66,15 +66,16 @@ for my $test ( @fetch_tests ) {
     }
     else {
 
-        my $found = $set->fetch( @{$test->{query}} );
+        my @found = $set->fetch( @{$test->{query}} );
 
         if ( $test->{result} eq 'y' ) {
-            ok( $found , 'found match' );
-            is( ref $found, 'My::Envoy::Widget');
-            is_deeply( $found->dump, $db_params );
+            is( scalar( @found ) , 1, 'just 1 match' );
+            isa_ok( $found[0], 'My::Envoy::Widget');
+            is_deeply( $found[0]->dump, $db_params );
         }
         elsif ( $test->{result} eq 'n' ) {
-            ok( ! defined $found , 'no match found for '. Dumper $test->{query} );
+            is( scalar( @found ) , 1, 'just 1 match' );
+            ok( ! defined $found[0] , 'no match found for '. Dumper $test->{query} );
 
         }
         else {

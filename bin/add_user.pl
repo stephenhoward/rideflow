@@ -26,6 +26,7 @@ my $user = RideFlow::Model->m('User')->build({
 })->save();
 
 $user->set_password($password);
+$user->save();
 
 my $user_check = RideFlow::Model->m('User')->fetch( id => $user->id );
 

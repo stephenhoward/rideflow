@@ -111,7 +111,7 @@ sub model_output {
         $tt->process('model.tt',{ 
             model      => $model,
             model_name => $name,
-        },'lib/RideFlow/Model/'.$name.'.pm')
+        },'var/lib/RideFlow/Model/'.$name.'.pm')
             or die $tt->error();           
     }
 }
@@ -201,7 +201,7 @@ sub db_output {
         $tt->process('dbic.tt',{ 
             model      => $model,
             model_name => $name,
-        },'lib/RideFlow/DB/Result/'.$name.'.pm')
+        },'var/lib/RideFlow/DB/Result/'.$name.'.pm')
             or die $tt->error();
     }
 }

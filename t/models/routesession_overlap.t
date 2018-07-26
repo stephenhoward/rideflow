@@ -80,7 +80,7 @@ my %overlap_tests = (
 );
 
 my $sessions  = RideFlow::Model->m('RouteSession');
-my $txn_guard = $sessions->model->_schema->txn_scope_guard;
+my $txn_guard = $sessions->get_storage('DBIC')->schema->txn_scope_guard;
 
 my $driver  = RideFlow::Model->m('User')->build({
     firstname => 'Test',
@@ -95,9 +95,9 @@ my $route   = RideFlow::Model->m('Route')->build({
 
 subtest 'Verify Needed Objects' => sub {
 
-    ok( $driver->in_storage );
-    ok( $vehicle->in_storage );
-    ok( $route->in_storage );
+    ok( $driver->in_storage('DBIC') );
+    ok( $vehicle->in_storage('DBIC') );
+    ok( $route->in_storage('DBIC') );
 };
 
 while( my ( $test, $params ) = each %overlap_tests ) {
@@ -113,7 +113,7 @@ while( my ( $test, $params ) = each %overlap_tests ) {
             session_end   => prefix_date( $params->{a}[1] ),
         })->save();
 
-        ok( $a->in_storage, 'A: successful save' );
+        ok( $a->in_storage('DBIC'), 'A: successful save' );
 
         my $b = $sessions->build({
             route   => $route,
@@ -126,11 +126,11 @@ while( my ( $test, $params ) = each %overlap_tests ) {
         if ( $params->{pass} ) {
             eval { $b->save() };
             ok( ! $@, 'no overlap' );
-            ok( $b->in_storage, 'B: successful save' );
+            ok( $b->in_storage('DBIC'), 'B: successful save' );
         }
         else {
             dies_ok { $b->save() } 'overlap found';
-            ok( ! $b->in_storage, 'B: did not save' );
+            ok( ! $b->in_storage('DBIC'), 'B: did not save' );
         }
 
         $a->delete();

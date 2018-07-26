@@ -5,9 +5,7 @@ use Moose;
 use Scalar::Util 'blessed';
 use RideFlow::Models;
 
-with 'Model::Envoy::Set';
-
-sub namespace { 'RideFlow::Model' }
+with 'Model::Envoy::Set' => { namespace => 'RideFlow::Model' };
 
 RideFlow::Models->load_all;
 
@@ -19,7 +17,7 @@ sub _list {
 
     my @args = @_;
 
-    if ( $self->model->can_archive ) {
+    if ( $self->model_class->can_archive ) {
 
         my $is_false = { '=', [ 'f', undef ] };
 

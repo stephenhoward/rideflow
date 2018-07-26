@@ -2,3 +2,8 @@ var/*
 ansible/playbook.retry
 vagrant/server/.vagrant
 .sass-cache
+db/*
+*.sublime-project
+*.sublime-workspace
+cover_db/*
+.DS_Store

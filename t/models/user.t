@@ -18,7 +18,7 @@ my $password = random_string(32);
 
 subtest '1 Step User Create' => sub {
 
-    my $txn_guard = $users->model->_schema->txn_scope_guard;
+    my $txn_guard = $users->get_storage('DBIC')->schema->txn_scope_guard;
     my $user = $users->build({
         email    => $email,
         password => $password
@@ -54,7 +54,7 @@ subtest '1 Step User Create' => sub {
 
 subtest 'Progressive User Create' => sub {
 
-    my $txn_guard = $users->model->_schema->txn_scope_guard;
+    my $txn_guard = $users->get_storage('DBIC')->schema->txn_scope_guard;
     my $email2 = random_string(16) . '@' . random_string(16) . '.com';
 
     my $user = $users->build({

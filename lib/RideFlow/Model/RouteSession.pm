@@ -14,7 +14,7 @@ sub _save {
         $self->session_start( DateTime->now() );
     }
 
-    if ( ! $self->in_storage ) {
+    if ( ! $self->get_storage('DBIC')->in_storage ) {
         die "Route Session overlaps with existing session for this Driver or Vehicle"
             if $self->_overlaps_existing_session;
     }
@@ -25,7 +25,7 @@ sub _save {
 sub _overlaps_existing_session {
     my ( $self ) = @_;
 
-    my $dtf = $self->_schema->storage->datetime_parser;
+    my $dtf = $self->get_storage('DBIC')->schema->storage->datetime_parser;
     my $start = $dtf->format_datetime($self->session_start);
     my $end   = $self->session_end ? $dtf->format_datetime($self->session_end) : undef;
 

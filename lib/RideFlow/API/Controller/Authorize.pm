@@ -45,7 +45,7 @@ sub create_password_reset {
 
     if ( my $user = $c->models('User')->fetch( email => lc $c->req->json->{email} ) ) {
 
-        $c->models('PasswordReset')->model->issue_reset($user)->send;
+        $c->models('PasswordReset')->model_class->issue_reset($user)->send;
 
         return $c->render( openapi => 'Ok' );
     }

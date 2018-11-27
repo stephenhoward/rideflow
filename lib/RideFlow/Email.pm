@@ -4,10 +4,11 @@ use Moose;
 
 use Email::Simple;
 use Email::Sender::Simple;
+use MooseX::ClassAttribute;
 use Template;
 use RideFlow::Config 'configure';
 
-has tt => (
+class_has tt => (
     is      => 'rw',
     lazy    => 1,
     default => sub {
@@ -37,7 +38,8 @@ sub send_message {
         $params{body} = $body;
     }
 
-    $params{headers}{From} ||= configure->{email}{from};
+    $params{header}{From} ||= configure->{email}{from};
+    $params{header} = [ %{$params{header}} ];
 
     my $email = Email::Simple->create(%params);
 

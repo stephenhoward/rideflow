@@ -45,7 +45,7 @@ sub send {
     die "user has no email" unless $self->user->email;
 
     RideFlow::Email->send_message(
-        headers {
+        header => {
             To => $self->user->email,
         },
         template => 'password_reset.tt',

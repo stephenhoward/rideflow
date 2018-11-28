@@ -21,17 +21,17 @@ sub fetch {
     RideFlow::Model->m($class)->fetch(@_);
 }
 
-sub delete {
-    my ( $self ) = @_;
+around 'delete' => sub {
+    my ( $orig, $self ) = @_;
 
     if ( $self->can_archive ) {
         $self->archived(1);
         $self->save();
     }
     else {
-        $self->SUPER::delete;
+        $self->$orig();
     }
-}
+};
 
 sub restore {
     my ( $self ) = @_;

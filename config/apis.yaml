@@ -360,11 +360,8 @@ apis:
                           required: true
                           schema:
                             type: object
-                            required: [ password' ]
+                            required: [ 'password' ]
                             properties:
-                                email:
-                                    type: string
-                                    format: email
                                 password:
                                     type: string
                                     format: password

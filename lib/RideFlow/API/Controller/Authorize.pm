@@ -148,7 +148,7 @@ sub _if_valid_reset_token {
             return $c->render_status( 410 => 'Expired' );
         }
         else {
-            return $callback($c,$reset_token);
+            return $callback->($c,$reset_token);
         }
     }
     return $c->render_status( 404 => 'Not Found' );
